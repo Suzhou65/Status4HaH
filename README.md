@@ -2,6 +2,7 @@
 [![python](https://github.takahashi65.info/lib_badge/python.svg)](https://www.python.org/)
 [![python version](https://github.takahashi65.info/lib_badge/python-3.6.svg)](https://www.python.org/) 
 [![UA](https://github.takahashi65.info/lib_badge/active_development.svg)](https://github.com/Suzhou65/Status4HaH)
+[![Size](https://github-size-badge.herokuapp.com/Suzhou65/Status4HaH.svg)](https://github.com/axetroy/github-size-badge)
 
 Status check for Hentai@Home Client.
 
@@ -13,7 +14,7 @@ Status check for Hentai@Home Client.
     + [E-Hentai account](#e-hentai-account)
     + [Email sending](#email-sending)
   * [Configuration file](#configuration-file)
-    + [Modules instantiation](#modules-instantiation)
+  * [Modules instantiation](#modules-instantiation)
   * [Security and Disclaimer](#security-and-disclaimer)
   * [Import module](#import-module)
   * [Function](#function)
@@ -113,7 +114,7 @@ You can editing the clean copy, which looks like this:
 ```
 If you fill in with correct configure, it will skip initialization step.
 
-### Modules instantiation
+## Modules instantiation
 Some module not included in [Python Standard Library](https://docs.python.org/3/library/index.html) are needed.
 - [pandas](https://pypi.org/project/pandas/)
 - [schedule](https://pypi.org/project/schedule/)
