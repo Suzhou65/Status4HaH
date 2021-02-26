@@ -71,8 +71,10 @@ def hentai6home( pass_hash_renew=() ):
         try:
             hentai_respon = requests.get(hentaiathome, headers=login_headers, cookies=login_cookies, timeout=5)
             if hentai_respon.status_code == 200:
+                hentai_respon.close()
                 return hentai_respon.content
             else:
+                hentai_respon.close()
                 return hentai_respon.status_code
         except requests.exceptions.Timeout as error_time:
             logging.warning(error_time)
@@ -93,8 +95,10 @@ def hentai6home( pass_hash_renew=() ):
         try:
             hentai_respon = requests.get(hentaiathome, headers=login_headers, cookies=login_cookies, timeout=10)
             if hentai_respon.status_code == 200:
+                hentai_respon.close()
                 return hentai_respon.content
             else:
+                hentai_respon.close()
                 return hentai_respon.status_code
         except requests.exceptions.Timeout as error_time:
             logging.warning(error_time)
