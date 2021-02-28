@@ -26,10 +26,12 @@ Status check for Hentai@Home Client.
   * [Dependencies](#dependencies)
     + [Python version](#python-version)
     + [Python module](#python-module)
+    + [Webpage](#webpage)
   * [License](#license)
   * [Resources](#resources)
     + [Beautiful Soup](#beautiful-soup)
     + [E-Hentai](#e-hentai)
+    + [Install Hentai@Home](#install-hentai-home)
     + [Stack Overflow](#stack-overflow)
 
 ## Usage
@@ -367,7 +369,11 @@ General Public License -3.0
 
 ### E-Hentai
 - [About Hentai@Home](https://ehwiki.org/wiki/Hentai@Home)
-- [Raspbian install Hentai@Home, My Gits](https://gist.github.com/Suzhou65/3323c05432c0276487c6e21486e3ca80)
+
+### Install Hentai@Home
+- [Raspbian install Hentai@Home, setting environment](https://gist.github.com/Suzhou65/3323c05432c0276487c6e21486e3ca80)
+- [Raspbian install Hentai@Home, mount external hard drive](https://gist.github.com/Suzhou65/a68c44f343953fc245f6d4438cdbab77)
+- [Raspbian install Hentai@Home, initialization are starting](https://gist.github.com/Suzhou65/8207e6c7487bf303cc7615ad94352e42)
 
 ### Stack Overflow
 - [python BeautifulSoup parsing table](https://stackoverflow.com/questions/23377533/python-beautifulsoup-parsing-table)
