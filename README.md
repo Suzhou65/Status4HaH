@@ -47,20 +47,22 @@ Using schedule module for job scheduling, you can found the scheduling setting a
 ### E-Hentai account
 Using cookies to login, same as browser extension or viewer.
 
-If you browser is Google Chrome, right click to opening DevTools, switch to ```Network``` panel. After refresh [Hentai@Home](https://e-hentai.org/hentaiathome.php) page, click the element call ```hentaiathome.php```, you can find ```ipb_member_id``` and ```ipb_pass_hash``` at it's respon.
+If you browser is Google Chrome, right click to opening DevTools, switch to ```Network``` panel. After refresh [Hentai@Home](https://e-hentai.org/hentaiathome.php) page, click the element call ```hentaiathome.php```, you can find ```ipb_member_id```, ```ipb_pass_hash```  and ```ipb_session_id``` at it's respon.
 
 First time running this checker, it will asking the cookies.
 ```text
 Configuration not found, please initialize.
 
 Please enter the ipb_member_id: 114514
-Please enter the ipb_pass_hash: •••••••••••••••••••••••••••••
+Please enter the ipb_pass_hash: ••••••••••••••••••••••••••••••••
+Please enter the ipb_session_id: ••••••••••••••••••••••••••••••••
 ```
 If cookire expired, it will asking for update.
 ```text
-hash data expired, please enter data again.
+Data expired, please enter data again.
 
-Please enter the ipb_pass_hash: •••••••••••••••••••••••••••••
+Please enter the ipb_pass_hash: ••••••••••••••••••••••••••••••••
+Please enter the ipb_session_id: ••••••••••••••••••••••••••••••••
 ```
 If you doesn't went to stuck in login retry, you can also set ```disalbe_retry``` to ```True```.
 ```python
@@ -106,9 +108,10 @@ Status4HaH store configuration as JSON format file, named ```config.json```.
 You can editing the clean copy, which looks like this:
 ```json
 {
-  "last_update_time": "2021-02-17 08:25",
+  "last_update_time": "",
   "ipb_member_id": "",
   "ipb_pass_hash": "",
+  "ipb_session_id": "",
   "sender": "example@gmail.com",
   "scepter": "",
   "receiver": "receiver@gmail.com"
