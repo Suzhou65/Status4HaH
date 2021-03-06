@@ -35,11 +35,13 @@ def configuration( update_config=() ):
             print("Configuration not found, please initialize.\r\n")
             ipb_member_id = input("Please enter the ipb_member_id: ")
             ipb_pass_hash = getpass("Please enter the ipb_pass_hash: ")
+            ipb_session = getpass("Please enter the ipb_session_id: ")
             #Dictionary
             initialize_config = {
                 "last_update_time":time_initialize,
                 "ipb_member_id":ipb_member_id,
                 "ipb_pass_hash":ipb_pass_hash,
+                "ipb_session_id":ipb_session
                 }
             #Save configuration file
             with open("config.json", "w") as configuration_file:
@@ -55,7 +57,7 @@ def configuration( update_config=() ):
             return update_config
 
 #Sign in e-hentai, and get HTML respon
-def hentai6home( pass_hash_renew=() ):
+def hentai6home( pass_hash_renew=(), session_renew=() ):
     #Global
     login_headers = {"user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36 Edg/88.0.705.68"}
     hentaiathome = "https://e-hentai.org/hentaiathome.php"
@@ -63,10 +65,11 @@ def hentai6home( pass_hash_renew=() ):
     cookie_generate = configuration(update_config=False)
     ipbm = cookie_generate["ipb_member_id"]
     ipbp = cookie_generate["ipb_pass_hash"]
+    ibps = cookie_generate["ipb_session_id"]
     #Sign in
     if bool(pass_hash_renew) is False:
         #Cookies
-        login_cookies = {"ipb_member_id":ipbm, "ipb_pass_hash":ipbp}
+        login_cookies = {"ipb_member_id":ipbm, "ipb_pass_hash":ipbp, "ipb_session_id":ibps}
         #Get hentaiathome page
         try:
             hentai_respon = requests.get(hentaiathome, headers=login_headers, cookies=login_cookies, timeout=5)
@@ -86,12 +89,13 @@ def hentai6home( pass_hash_renew=() ):
     elif bool(pass_hash_renew) is True:
         update_config = cookie_generate
         update_config["ipb_pass_hash"] = pass_hash_renew
+        update_config["ipb_session_id"] = session_renew
         #Stamp
         time_renew_hash = current_time()
         update_config["last_update_time"] = time_renew_hash
         #Update configuration
         configuration(update_config)
-        login_cookies = {"ipb_member_id":ipbm, "ipb_pass_hash":pass_hash_renew}
+        login_cookies = {"ipb_member_id":ipbm, "ipb_pass_hash":pass_hash_renew, "ipb_session_id":session_renew}
         try:
             hentai_respon = requests.get(hentaiathome, headers=login_headers, cookies=login_cookies, timeout=10)
             if hentai_respon.status_code == 200:
@@ -128,10 +132,11 @@ def hentai_status( output_dataframe=(), disalbe_retry=() ):
                 #Found login table, maybe the cookie is expired
                 if bool(disalbe_retry) is False:
                     #Let's try again
-                    print("hash data expired, please enter data again.\r\n")
+                    print("Data expired, please enter data again.\r\n")
                     pass_hash_renew = getpass("Please enter the ipb_pass_hash: ")
+                    session_renew = getpass("Please enter the ipb_session_id: ")
                     #Update data, try again
-                    h6h_respon = hentai6home(pass_hash_renew)
+                    h6h_respon = hentai6home(pass_hash_renew, session_renew)
                     #Again, parsing HTML
                     hentai_soup = BeautifulSoup(h6h_respon,"html.parser")
                     #Get status table
@@ -235,4 +240,4 @@ def soup_alert( soup_menu, sender_account=(), sender_password=(), receiver=(), d
         print("Error occurred when sending mail")
         return 404
 
-#2021_02_17
+#2021_03_06
