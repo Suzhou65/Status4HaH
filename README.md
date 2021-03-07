@@ -47,7 +47,7 @@ Using schedule module for job scheduling, you can found the scheduling setting a
 ### E-Hentai account
 Using cookies to login, same as browser extension or viewer.
 
-If you browser is Google Chrome, right click to opening DevTools, switch to ```Network``` panel. After refresh [Hentai@Home](https://e-hentai.org/hentaiathome.php) page, click the element call ```hentaiathome.php```, you can find ```ipb_member_id```, ```ipb_pass_hash```  and ```ipb_session_id``` at it's respon.
+If you browser is Google Chrome, right click to opening DevTools, switch to ```Network``` panel. After refresh [Hentai@Home](https://e-hentai.org/hentaiathome.php) page, click the element call ```hentaiathome.php```, you can find ```ipb_member_id```, ```ipb_pass_hash```  and ```ipb_session_id``` at HTTP header.
 
 First time running this checker, it will asking the cookies.
 ```text
