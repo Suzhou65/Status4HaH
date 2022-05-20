@@ -1,6 +1,7 @@
-#coding=utf-8
+# -*- coding: utf-8 -*-
 import csv
 import json
+import re
 import pandas
 import logging
 import smtplib
@@ -18,6 +19,14 @@ logging.basicConfig(level=logging.WARNING, filename="error.log", filemode="a", f
 def current_time():
     today = datetime.datetime.now()
     return today.strftime("%Y-%m-%d %H:%M")
+
+#Program Status
+def program_status( event=() ):
+    ststus_header = ["Time", "Status"]
+    status_table =  [current_time(), event]
+    status_output = pandas.DataFrame(data=[status_table], columns=ststus_header)
+    status_output.to_csv("status_program.csv", mode="w", index=False)
+    return status_table
 
 #Sign in fuction
 def configuration( update_config=() ):

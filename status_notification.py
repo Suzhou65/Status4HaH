@@ -1,10 +1,14 @@
-#coding=utf-8
+# -*- coding: utf-8 -*-
+import sys
 import time
 import pandas
 import logging
 import schedule
 import status4hentai
 from getpass import getpass
+
+#Scheduled Config, Minutes
+scheduled_time = 30
 
 #Email configuration Mode
 disalbe_phone_book = False
@@ -53,7 +57,7 @@ def notification():
     #Set header
     error_header = ["Last Update Time","Error Status"]
     #Get time
-    event_time = status4hentai.current_time()
+    timestamp_event = status4hentai.current_time()
     #Get parsing result, as DataFrame
     status_frame = status4hentai.hentai_status(output_dataframe=True, disalbe_retry=False)
     #Check
@@ -62,23 +66,23 @@ def notification():
         if status_frame is False:
             #Message
             error_message = "Error occurred when parsing."
-            print(f"{event_time} | {error_message}")
+            print(f"{timestamp_event} | {error_message}")
             #Save Status
-            error_status = [event_time, error_message]
+            error_status = [timestamp_event, error_message]
             cold_soup = pandas.DataFrame(data=[error_status], columns=error_header)
             cold_soup.to_csv("status_monitor.csv", mode="w", index=False)
         #If return True, means Unable to login E-Hentai, and retry is disable
         elif status_frame is True:
             #Message
             soup_menu = "Unable to login E-Hentai, Login retry is disable."
-            print(f"{event_time} | {soup_menu}")
+            print(f"{timestamp_event} | {soup_menu}")
             #Email configuration
             if bool(disalbe_phone_book) is False:
                 status4hentai.soup_alert(soup_menu)
             elif bool(disalbe_phone_book) is True:
                 status4hentai.soup_alert(soup_menu, sender_account, sender_password, receiver, disalbe_phone_book=True)
             #Save Status
-            error_status = [event_time, soup_menu]
+            error_status = [timestamp_event, soup_menu]
             cold_soup = pandas.DataFrame(data=[error_status], columns=error_header)
             cold_soup.to_csv("status_monitor.csv", mode="w", index=False)
     elif type(status_frame) is list:
@@ -93,7 +97,7 @@ def notification():
         #Check status
         if status_check in filtered_soup.values:
             #Print in terminal
-            print(f"{event_time} | Server offline")
+            print(f"{timestamp_event} | Server offline")
             #Message
             broth = filtered_soup.loc[filtered_soup["Status"] == status_check].drop(spoon_zwei, axis=1).to_string(header=False, index=False)
             soup_menu = broth.replace("\n"," ; ")
@@ -105,15 +109,16 @@ def notification():
             else:
                 status4hentai.soup_alert(soup_menu, sender_account, sender_password, receiver, disalbe_phone_book=True)
         else:
-            print(f"{event_time} | Server online")
+            print(f"{timestamp_event} | Server online")
             #Refresh status
             filtered_soup.to_csv("status_monitor.csv", mode="w", index=False)
+            status4hentai.program_status( event="Check Complete")
 
-#Execute setting
-schedule.every(45).minutes.do(notification)
+#Scheduled Execute
+schedule.every(scheduled_time).minutes.do(notification)
 #Running
-initialize = status4hentai.current_time()
-print(f"{initialize} | Now monitoring, pressing CTRL+C to exit.")
+initialize = status4hentai.program_status(event="Start monitoring")
+print(f"{initialize}\r\npressing CTRL+C to exit.")
 #Loop
 try:
     while True:
@@ -122,14 +127,10 @@ try:
 #Error save
 except Exception as error_status:
     logging.exception(error_status)
+    status4hentai.program_status(event="Error")
     print("Save error status to log file ...")
 #Crtl+C to exit
 except KeyboardInterrupt:
-    exit_time = status4hentai.current_time()
-    #Refresh status
-    exit_header = ["Last Update Time","Error Status"]
-    exit_status = [exit_time,"Offline notification isn't running."]
-    soup_drain = pandas.DataFrame(data=[exit_status], columns=exit_header)
-    soup_drain.to_csv("status_monitor.csv", mode="w", index=False)
-    #Exit message
-    print(f"\r\n{exit_time} | Thank you for using the offline notification.\r\nGoodBye ...")
+    termination = status4hentai.program_status(event="Offline")
+    print(f"\r\n{termination}\r\nThank you for using the offline notification.\r\nGoodBye ...")
+    sys.exit(0)
