@@ -41,7 +41,7 @@ You need to have E-Hentai account, and already running Hentai@Home client.
 Using schedule module for job scheduling, you can found the scheduling setting at scripts examples.
 - Avoiding for making heavy server load on E-Hentai
 ```diff
-- Default interval at scripts is 45 minutes, not recommended for change less then 30 minutes.
+- Default interval at scripts is 30 minutes, not recommended for change less then 30 minutes.
 ```
 
 ### E-Hentai account
