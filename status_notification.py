@@ -112,7 +112,7 @@ def notification():
             print(f"{timestamp_event} | Server online")
             #Refresh status
             filtered_soup.to_csv("status_monitor.csv", mode="w", index=False)
-            status4hentai.program_status( event="Check Complete")
+    status4hentai.program_status()
 
 #Scheduled Execute
 schedule.every(scheduled_time).minutes.do(notification)

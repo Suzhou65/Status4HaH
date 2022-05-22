@@ -23,7 +23,10 @@ def current_time():
 #Program Status
 def program_status( event=() ):
     ststus_header = ["Time", "Status"]
-    status_table =  [current_time(), event]
+    if bool(event) is False:
+        status_table =  [current_time(), "Check Complete"]
+    elif bool(event) is True:
+        status_table =  [current_time(), event]
     status_output = pandas.DataFrame(data=[status_table], columns=ststus_header)
     status_output.to_csv("status_program.csv", mode="w", index=False)
     return status_table
@@ -249,4 +252,4 @@ def soup_alert( soup_menu, sender_account=(), sender_password=(), receiver=(), d
         print("Error occurred when sending mail")
         return 404
 
-#2021_03_06
+#2022_05_22
