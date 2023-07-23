@@ -20,7 +20,7 @@ def GetTime():
     return CurrentTime.strftime("%Y-%m-%d %H:%M:%S")
 
 # Program running status
-def ProgramCurrentStatus(EventUpdate=()):
+def ProgramCurrentStatus(StatusFilePath,EventUpdate=()):
     # Table header config
     StstusHeader = ["Time","Status"]
     # If check procress complete normally
@@ -32,17 +32,17 @@ def ProgramCurrentStatus(EventUpdate=()):
     # Save as table
     status_output = pandas.DataFrame(data=[StatusTable],columns=StstusHeader)
     # Save to csv file
-    status_output.to_csv("status4hah.status.csv",mode="w",index=False)
+    status_output.to_csv(StatusFilePath,mode="w",index=False)
     # Return as python table
     return StatusTable
 
 # Configuration file
-def Configuration(ConfigUpdate=()):
+def Configuration(ConfigFilePath,ConfigUpdate=()):
     # Just read configuration
     if not ConfigUpdate:
         # Reading configuration file
         try:
-            with open("status4hah.config.json","r") as ConfigurationFile:
+            with open(ConfigFilePath,"r") as ConfigurationFile:
                 # Return as python dictionary
                 return json.load(ConfigurationFile)
         # If file not found
@@ -73,7 +73,7 @@ def Configuration(ConfigUpdate=()):
                 "telegram_id":""
                 }
             # Save configuration file
-            with open("status4hah.config.json","w") as ConfigurationFile:
+            with open(ConfigFilePath,"w") as ConfigurationFile:
                 # Save
                 json.dump(ConfigInitialize,ConfigurationFile,indent=2)
                 print("Configuration saved successfully.")
@@ -85,19 +85,19 @@ def Configuration(ConfigUpdate=()):
         TimeConfigUpdate = GetTime()
         ConfigUpdate["last_update"] = TimeConfigUpdate
         # Save
-        with open("status4hah.config.json","w") as ConfigurationFile:
+        with open(ConfigFilePath,"w") as ConfigurationFile:
             json.dump(ConfigUpdate,ConfigurationFile,indent=2)
             # Return dictionary
             return ConfigUpdate
 
 # Check Hentai@Home
-def CheckHentaiatHome():
+def CheckHentaiatHome(ConfigFilePath):
     # Request User-agent
     RequestHeaders = {"user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.82"}
     # Hentai@Home page
     HentaiAtHomePage = "https://e-hentai.org/hentaiathome.php"
     # Make SignIn Cookie
-    CookiePayload = Configuration()
+    CookiePayload = Configuration(ConfigFilePath)
     ipbm = CookiePayload["ipb_member_id"]
     ipbp = CookiePayload["ipb_pass_hash"]
     ibps = CookiePayload["ipb_session_id"]
@@ -189,10 +189,10 @@ def GetHentaiStatus(ResponPayload):
         return False
 
 # Sending mail
-def SendAlertMail(MailPayload,MailOption=()):
+def SendAlertMail(MailPayload,MailOption=(),ConfigFilePath=()):
     # Option, load configuration
     if not MailOption:
-        MailConfig = Configuration()
+        MailConfig = Configuration(ConfigFilePath)
         # Configuration not found
         if len(MailConfig["mail_sender"]) == 0:
             MessageSending = "Mail Configuration not found, please initialize."
@@ -233,10 +233,10 @@ def SendAlertMail(MailPayload,MailOption=()):
         return False
 
 # Sending telegram message via bots
-def SendAlertTelegram(TelegramPayload,TelegramOption=()):
+def SendAlertTelegram(TelegramPayload,TelegramOption=(),ConfigFilePath=()):
     # Option, load configuration
     if not TelegramOption:
-        TelegramConfig = Configuration()
+        TelegramConfig = Configuration(ConfigFilePath)
         # Configuration not found
         if len(TelegramConfig["telegram_token"]) == 0:
             MessageSending = "Telegram Configuration not found, please initialize."
@@ -269,4 +269,4 @@ def SendAlertTelegram(TelegramPayload,TelegramOption=()):
         logging.exception(ErrorStatus)
         return False
 
-#2023_07_22
+# 2023_07_23

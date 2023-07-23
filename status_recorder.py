@@ -1,76 +1,77 @@
 #coding=utf-8
-import csv
 import time
-import pandas
-import logging
 import schedule
 import status4hentai
 
-#Error handling
-FORMAT = "%(asctime)s |%(levelname)s |%(message)s"
-logging.basicConfig(level=logging.WARNING, filename="error.log", filemode="a", format=FORMAT)
+# Configuration file path
+ConfigFilePath = "status4hah.config.json"
+# Recording file path
+RecordingPath = "status4hah.record.csv"
+# Create status file
+StatusFilePath = "status4hah.status.csv"
 
-#Create_recoding_file
-try:
-    with open("status_record.csv", mode="r") as record_book:
-        tape = csv.reader(record_book)
-        record_book.close()
-#If data not found
-except FileNotFoundError:
-    print("Recoding file create")
-    with open("status_record.csv", mode="w") as record_book:
-        tape = csv.writer(record_book)
-        tape.writerow(["Client","ID","Status","Last Seen","Files Served","Trust","Quality","Hitrate","Hathrate"])
-        record_book.close()
-
-#Function
-def status_recorder():
-    event_time = status4hentai.current_time()
-    status_frame = status4hentai.hentai_status(output_dataframe=True, disalbe_retry=False)
-    #Check
-    if type(status_frame) is bool:
-        #If return False, means Error
-        if status_frame is False:
-            #Message
-            print(f"{event_time} | Error occurred when parsing HTML page.")
-            #Status
-            with open("status_record.csv", mode="a") as record_book:
-                taping = csv.writer(record_book)
-                taping.writerow(["","","Error",event_time,"","","","",""])
-                record_book.close()
-        #If return True, means Unable to login E-Hentai, and retry is disable
-        elif status_frame is True:
-            print(f"{event_time} | Unable to login E-Hentai, Login retry is disable")
-            #Status
-            with open("status_record.csv", mode="a") as record_book:
-                taping = csv.writer(record_book)
-                taping.writerow(["","","Unable Login",event_time,"","","","",""])
-                record_book.close()
-    elif type(status_frame) is list:
-        error_datatype = "Data type should be DataFrame, please set 'output_dataframe=True'."
-        logging.warning(error_datatype)
-    #Recording
+# Function
+def StatusRecorder(ConfigFilePath,RecordingPath,StatusFilePath):
+    # Get Hentai@Home Page
+    ResponPayload = status4hentai.CheckHentaiatHome(ConfigFilePath)
+    # Check Hentai@Home status
+    DataTableOutput = status4hentai.GetHentaiStatus(ResponPayload)
+    # Check output
+    # Get boolean, means error
+    if type(DataTableOutput) is bool:
+        TimeStamp = status4hentai.GetTime()
+        # Error message
+        EventUpdate = "Error occurred when running program, check log."
+        # Write status file
+        status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
+        # Print message
+        print(f"{TimeStamp} | {EventUpdate}")
+    # Get string, means controllable error or logout
+    elif type(DataTableOutput) is str:
+        TimeStamp = status4hentai.GetTime()
+        # Get HTTP status code or timeout error message
+        EventUpdate = DataTableOutput
+        # Write status file
+        status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
+        # Print message
+        print(f"{TimeStamp} | {EventUpdate}")
+    # Get pandas DataFrame
     else:
-        filter_spoon = ["Created","Client IP","Port","Version","Max Speed","Country"]
-        filtered_soup = status_frame.drop(filter_spoon, axis=1)
-        filtered_soup.to_csv("status_record.csv", mode="a", index=False, header=False)
-        print(f"{event_time} | Recording ...")
+        # Drop columns config
+        DataTableFilter = ["Created","Client IP","Port","Version","Max Speed"]
+        # Drop unneeded columns
+        DataTableOutput.drop(columns=DataTableFilter,inplace=True)
+        # Saving
+        DataTableOutput.to_csv(RecordingPath,mode="a",index=False,header=False)        
+        TimeStamp = status4hentai.GetTime()
+        EventUpdate = "Recording ..."
+        # Write status file
+        status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
+        print(f"{TimeStamp} | {EventUpdate}")
 
-#Execute setting
-schedule.every(45).minutes.do(status_recorder)
-#Running
-initialize = status4hentai.current_time()
-print(f"{initialize} | Now recording, pressing CTRL+C to exit.")
-#Loop
+# Execute setting
+schedule.every(30).minutes.do(StatusRecorder,ConfigFilePath,RecordingPath,StatusFilePath)
+# Running
+EventUpdate = "Program start"
+status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
+InitializeTime = status4hentai.GetTime()
+print(f"{InitializeTime} | Now recording, pressing Control + C to exit.")
+# Loop
 try:
     while True:
         schedule.run_pending()
         time.sleep(1)
-#Error save
-except Exception as error_status:
-    logging.exception(error_status)
-    print("Save error status to log file ...")
-#Crtl+C to exit
+# Error handling
+except Exception:
+    StopTime = status4hentai.GetTime()
+    EventUpdate = "Program has stopped working due to error"
+    status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
+    print(f"{StopTime} | Error occurred when running program.")
+# Crtl+C to exit
 except KeyboardInterrupt:
-    exit_time = status4hentai.current_time()
-    print(f"\r\n{exit_time} | Thank you for using the status recoder.\r\nGoodBye ...")
+    ExitTime = status4hentai.GetTime()
+    EventUpdate = "Program has stopped working"
+    status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
+    print(f"\r\n{ExitTime} | Thank you for using the status recoder.\r\nGoodBye ...")
+
+# 2023_07_23
