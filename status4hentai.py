@@ -185,7 +185,6 @@ def GetHentaiStatus(ResponPayload):
         return MessageParsing
     # Get exception error input, the worst case
     else:
-        logging.error(MessageParsing)
         return False
 
 # Sending mail
