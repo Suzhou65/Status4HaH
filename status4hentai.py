@@ -194,7 +194,7 @@ def SendAlertMail(MailPayload,ConfigFilePath):
     MailConfig = Configuration(ConfigFilePath)
     # Configuration not found
     if len(MailConfig["mail_sender"]) == 0:
-        MessageSending = "Mail Configuration not found, please initialize."
+        MessageSending = "Mail configuration not found, please initialize."
         logging.error(MessageSending)
         return 404
     # Find configuration
@@ -231,7 +231,7 @@ def SendAlertTelegram(TelegramPayload,ConfigFilePath):
     TelegramConfig = Configuration(ConfigFilePath)
     # Configuration not found
     if len(TelegramConfig["telegram_token"]) == 0:
-        MessageSending = "Telegram Configuration not found, please initialize."
+        MessageSending = "Telegram configuration not found, please initialize."
         logging.error(MessageSending)
         return 404
     # Find configuration

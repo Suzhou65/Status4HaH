@@ -2,7 +2,7 @@
 [![python](https://github.takahashi65.info/lib_badge/python.svg)](https://www.python.org/)
 [![python version](https://github.takahashi65.info/lib_badge/python-3.6.svg)](https://www.python.org/) 
 [![UA](https://github.takahashi65.info/lib_badge/active_development.svg)](https://github.com/Suzhou65/Status4HaH)
-[![Size](https://github-size-badge.herokuapp.com/Suzhou65/Status4HaH.svg)](https://github.com/axetroy/github-size-badge)
+[![Size](https://img.shields.io/github/repo-size/Suzhou65/Status4HaH)](https://shields.io/category/size)
 
 Status check for Hentai@Home Client.
 
@@ -12,14 +12,14 @@ Status check for Hentai@Home Client.
   * [Usage](#usage)
     + [Scheduling and server loading](#scheduling-and-server-loading)
     + [E-Hentai account](#e-hentai-account)
-    + [Email sending](#email-sending)
+    + [Email alert](#email-alert)
+    + [Telegram alert](#telegram-alert)
   * [Configuration file](#configuration-file)
   * [Modules instantiation](#modules-instantiation)
   * [Security and Disclaimer](#security-and-disclaimer)
   * [Import module](#import-module)
   * [Function](#function)
     + [Get HentaiAtHome status](#get-hentaiathome-status)
-    + [Offline checker](#offline-checker)
     + [Offline notification](#offline-notification)
     + [Status recorder](#status-recorder)
     + [Web Based Monitor](#web-based-monitor)
@@ -57,67 +57,45 @@ Please enter the ipb_member_id: 114514
 Please enter the ipb_pass_hash: ••••••••••••••••••••••••••••••••
 Please enter the ipb_session_id: ••••••••••••••••••••••••••••••••
 ```
-If cookies expired, it will asking for update.
-```text
-Data expired, please enter data again.
-
-Please enter the ipb_pass_hash: ••••••••••••••••••••••••••••••••
-Please enter the ipb_session_id: ••••••••••••••••••••••••••••••••
-```
-If you doesn't went to stuck in login retry, you can also set ```disalbe_retry``` to ```True```.
-```python
-hentai_status(disalbe_retry=True)
-```
-When cookie data expired, it wil return ```True```. It's different from error occurred, which return ```False``` as result.
-
-### Email sending
+### Email alert
 - Google account needed, sign in using App passwords.
 - Receiver is unlimited.
 
-First time running email sending, it will asking configuration.
+First time running mail alert function, it will check configuration file. If mail configuration not found, it will print alert.
 ```text
-Mail Configuration not found, please initialize.
-
-Please enter the sender account: example@gmail.com
-Please enter the sender password: •••••••••
-Please enter the receiver address: receiver@gmail.com
+Mail configuration not found, please initialize.
 ```
+And return integer values ```404```.
+### Telegram alert
+- Using Telegram BOTs, contect [BotFather](https://t.me/botfather) create new bot accounts.
+- HTTP ```API Token``` and ```chat id``` are needed.
+- If the chat channel wasn't create, Telegram API will return HTTP code 400.
 
-You can also set ```disalbe_phone_book``` to ```True```, directly setting email configuration.
-```python
-#Email configuration Mode
-disalbe_phone_book = False
-#Email configuration
-if bool(disalbe_phone_book) is True:
-    sender = "example@gmail.com"
-    scepter = "••••••••••••••••"
-    receiver = "receiver@gmail.com"
-elif bool(disalbe_phone_book) is False:
-    mail_config = status4hentai.configuration(update_config=False)
-    #Try to read configuration
-    sender_account = mail_config["sender"]
-    sender_password = mail_config["scepter"]
-    receiver = mail_config["receiver"]
-
-soup_alert(soup_menu, sender_account, sender_password, receiver, disalbe_phone_book=True)
+First time running Telegram alert function, it will check configuration file. If mail configuration not found, it will print alert.
+```text
+Telegram configuration not found, please initialize.
 ```
+And return integer values ```404```.
 
 ## Configuration file
-Status4HaH store configuration as JSON format file, named ```config.json```.
+- Status4HaH store configuration as JSON format file.
+- Configuration file named ```status4hah.config.json```.
 
 You can editing the clean copy, which looks like this:
 ```json
 {
-  "last_update_time": "",
+  "last_update": "",
   "ipb_member_id": "",
   "ipb_pass_hash": "",
   "ipb_session_id": "",
-  "sender": "example@gmail.com",
-  "scepter": "",
-  "receiver": "receiver@gmail.com"
+  "mail_sender": "",
+  "mail_scepter": "",
+  "mail_receiver": "",
+  "telegram_token": "",
+  "telegram_id": ""
 }
 ```
-If you fill in with correct configure, it will skip initialization step.
+If you fill in with correct configure, it will skip initialization check and alert.
 
 ## Modules instantiation
 Some module not included in [Python Standard Library](https://docs.python.org/3/library/index.html) are needed.
@@ -139,203 +117,46 @@ Although **ipb_pass_hash** is the password which has been hashed.
 ```python
 import status4hentai
 ```
-```python
-import status4hentai as hentai
-```
 - Alternatively, you can import the function independent
 ```python
-from status4hentai import hentai_status
+from status4hentai import GetHentaiStatus
 ```
 
 ## Function
 ### Get HentaiAtHome status
 ```python
-from status4hentai import hentai_status
-status_list = hentai_status()
-
-if type(status_list) is bool:
-  if status_list is False:
-    print("Error occurred when parsing.")
-  elif status_list is True:
-    print("Unable to login E-Hentai, Login retry is disable.")
-elif type(status_frame) is list:
-  print(status_list)
-else:
-  print("Data type should be list, please disable 'output_dataframe=True'.")
+# Get Hentai@Home Page
+ResponPayload = status4hentai.CheckHentaiatHome(ConfigFilePath)
+# Check Hentai@Home status
+DataTableOutput = status4hentai.GetHentaiStatus(ResponPayload)
 ```
-by default, it will return list as result:
-```python
-[
-  ['Server_Enis','•••••','Online','2017-09-12','Today 13:17','28265461','•••.••.•••.•••','80','1.6.1 Stable','2000 KB/s','+1000','4572','3.7','2.6','Taiwan'],
-  ['Server_Zwi','•••••','Online''2017-09-16','Today 13:18','36396067','•••.•••.•••.•••','80','1.6.1 Stable','2500 KB/s','+1000','5757','4.2','2.9','Moldova']
-  ]
-```
-If you want to return pandas DataFrame, set ```output_dataframe``` to ```True```:
-```python
-status_frame = hentai_status(output_dataframe=True)
-
-if type(status_frame) is bool:
-  if status_frame is False:
-    print("Error occurred when parsing.")
-  elif status_frame is True:
-    print("Unable to login E-Hentai, Login retry is disable.")
-elif type(status_frame) is list:
-  print("Data type should be DataFrame, please set 'output_dataframe=True'.")
-else:
-  print(status_frame)
-```
-It will return DataFrame as result:
-
- Client      | ID    | Status | Created    | Last Seen   | Files Served | Client IP       | Port | Version      | Max Speed | Trust | Quality | Hitrate | Hathrate | Country 
--------------|:------|-------:|-----------:|------------:|-------------:|----------------:|-----:|-------------:|----------:|------:|--------:|--------:|---------:|---------
- Server_Enis | ••••• | Online | 2017-09-12 | Today 13:17 |   28265461   | •••.••.•••.•••  |  80  | 1.6.1 Stable | 2000 KB/s | +807  | 4933    | 3.7     | 2.6      | Taiwan
- Server_Zwi  | ••••• | Online | 2017-09-16 | Today 13:18 |   36396067   | •••.•••.•••.••• |  80  | 1.6.1 Stable | 2500 KB/s | +982  | 3921    | 4.1     | 2.9      | Moldova
-
-If you enable ```disalbe_retry```, it will return ```True``` as result when cookie data expired.
-```python
-status_frame = hentai_status(output_dataframe=True, disalbe_retry=True)
-```
-If error occurred, it will return ```False```.
-
-### Offline checker
-- Return list as result by default:
-```python
-from status4hentai import hentai_status
-status_list = hentai_status(disalbe_retry=True)
-
-if type(status_list) is bool:
-  if status_list is False:
-    print("Error occurred when parsing.")
-  elif status_list is True:
-    print("Unable to login E-Hentai, Login retry is disable.")
-elif type(status_list) is list:
-  finder = "Offline"
-  if any(finder in sub for sub in status_list):
-    print("Server offline")
-  else:
-    print("Server online")
-else:
-  print("Data type should be list, please disable 'output_dataframe=True'.")
-```
-If the H@H client is offline, it will print:
-```
-Server offline
-```
-Otherwise, it will print:
-```text
-Server online
-```
-
-- If you wnat to return pandas DataFrame as result:
-```python
-import pandas
-from status4hentai import hentai_status
-status_frame = hentai_status(output_dataframe=True, disalbe_retry=True)
-
-if type(status_frame) is bool:
-  if status_frame is False:
-    print("Error occurred when parsing.")
-  elif status_frame is True:
-    print("Unable to login E-Hentai, Login retry is disable.")
-elif type(status_frame) is list:
-  print("Data type should be DataFrame, please set 'output_dataframe=True'.")
-else:
-  finder = "Offline"
-  if finder in status_frame.values:
-    print("Server offline")
-  else:
-    print("Server online")
-```
-If the H@H client is offline, it will print:
-```
-Server offline
-```
-Otherwise, it will print:
-```text
-Server online
-```
-
+- It will return ```Pandas DataFrame``` if parsing HTML content correctly.
+- If return ```string``` means controllable error, like server error or logout,
+- If return ```boolean``` means exception error.
 ### Offline notification
+- The demonstration script is```status_notification.py```.
+- Configuration as follows are needed.
 ```python
-import pandas
-import status4hentai
-status_frame = status4hentai.hentai_status(output_dataframe=True)
-
-mail_spoon = ["Created","Files Served","Client IP","Port","Version","Max Speed","Trust","Quality","Hitrate","Hathrate","Country"]
-
-if type(status_frame) is bool:
-  if status_frame is False:
-    print("Error occurred when parsing.")
-  elif status_frame is True:
-    print("Unable to login E-Hentai, Login retry is disable.")
-elif type(status_frame) is list:
-  print("Data type should be DataFrame, please set 'output_dataframe=True'.")
-else:
-  finder = "Offline"
-  if finder in status_frame.values:
-    filtering = status_frame.loc[status_frame["Status"] == finder].drop(mail_spoon, axis=1).to_string(header=False, index=False)
-    soup_menu =filtering.replace("\n"," ; ")
-    status4hentai.soup_alert(soup_menu)
-    print("Server offline")
-  else:
-    print("Server online")
+# Configuration file path
+ConfigFilePath = "status4hah.config.json"
+# Status file path
+CheckingResultPath = "status4hah.check.csv"
+# Create status file
+StatusFilePath = "status4hah.status.csv"
+# Alert mode selection
+AlertMode = 0
 ```
-If the H@H client is offline, it will print meaasge and sending mail.
-```
-Server offline
-```
-Otherwise, it will print:
-```text
-Server online
-```
-
 ### Status recorder
-- Using list mode  
-Recommend for single Hentai@Home client condition.
+- The demonstration script is```status_recorder.py```.
+- Configuration as follows are needed.
 ```python
-import csv
-from status4hentai import hentai_status
-
-status_list = hentai_status()
-
-if type(status_list) is bool:
-  if status_list is False:
-    print("Error occurred when parsing.")
-  elif status_list is True:
-    print("Unable to login E-Hentai, Login retry is disable.")
-elif type(status_list) is list:
-  with open("status_recoder.csv", "a") as soup_list:
-    for line in status_list:
-      soup_list.write(";".join([str(i) for i in line]))
-      soup_list.write("\n")
-else:
-  print("Data type should be list, please disable 'output_dataframe=True'.")
+# Configuration file path
+ConfigFilePath = "status4hah.config.json"
+# Recording file path
+RecordingPath = "status4hah.record.csv"
+# Create status file
+StatusFilePath = "status4hah.status.csv"
 ```
-- Using pandas DataFrame mode  
-Recommend for multi Hentai@Home client condition. You can easily separate DataFrame by client or ID.
-```python
-import pandas
-from status4hentai import hentai_status
-
-status_frame = hentai_status(output_dataframe=True)
-
-if type(status_frame) is bool:
-  if status_frame is False:
-    print("Error occurred when parsing.")
-  elif status_frame is True:
-    print("Unable to login E-Hentai, Login retry is disable.")
-elif type(status_frame) is list:
-  print("Data type should be DataFrame, please set 'output_dataframe=True'.")
-else:
-  #Separate by client name.
-  #Server_1
-  server_enis = status_frame.loc[status_frame["Client"] == "Server_Enis"]
-  server_enis.to_csv("status_recoder_01.csv", mode="a", index=False, header=False)
-  #Server_2
-  server_zwei = status_frame.loc[status_frame["Client"] == "Server_Zwei"]
-  server_zwei.to_csv("status_recoder_02.csv", mode="a",index=False, header=False)
-```
-
 ### Web Based Monitor
 ```status_monitor.php``` is a simple php script webpage to view the status file generated by ```status_notification.py```.
 
@@ -345,21 +166,20 @@ See the [Example](https://takahashi65.info/page/status_monitor.php), and the [Sc
 ### Python version
 - Python 3.6 or above
 ### Python module
-- beautifulsoup4
-- csv
-- datetime
-- email
-- getpass
-- json
-- logging
-- pandas
-- requests
-- smtplib
-- schedule
+- sys
 - time
+- json
+- pandas
+- logging
+- smtplib
+- requests
+- datetime
+- getpass
+- BeautifulSoup
+- MIMEText
 
 ### Webpage
-- apache2, verson 2.4.46 or above
+- Apache or NGINX
 - php 7.3 or above
 
 ## License
