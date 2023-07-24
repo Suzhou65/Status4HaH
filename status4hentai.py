@@ -189,29 +189,23 @@ def GetHentaiStatus(ResponPayload):
         return False
 
 # Sending mail
-def SendAlertMail(MailPayload,MailOption=(),ConfigFilePath=()):
-    # Option, load configuration
-    if not MailOption:
-        MailConfig = Configuration(ConfigFilePath)
-        # Configuration not found
-        if len(MailConfig["mail_sender"]) == 0:
-            MessageSending = "Mail Configuration not found, please initialize."
-            logging.error(MessageSending)
-            return 404
-        # Find configuration
-        else:
-            MailAccount = MailConfig["mail_sender"]
-            MailPassword = MailConfig["mail_scepter"]
-            MailReceiver = MailConfig["mail_receiver"]
-    # Option, manually setting configuration
-    elif type(MailOption) is list:
-        MailAccount = MailOption[0]
-        MailPassword = MailOption[1]
-        MailReceiver = MailOption[2]
+def SendAlertMail(MailPayload,ConfigFilePath):
+    # Load configuration
+    MailConfig = Configuration(ConfigFilePath)
+    # Configuration not found
+    if len(MailConfig["mail_sender"]) == 0:
+        MessageSending = "Mail Configuration not found, please initialize."
+        logging.error(MessageSending)
+        return 404
+    # Find configuration
+    else:
+        MailAccount = MailConfig["mail_sender"]
+        MailPassword = MailConfig["mail_scepter"]
+        MailReceiver = MailConfig["mail_receiver"]
     # Sending mail via gmail
     MailMessage = MIMEText(MailPayload)
     MailTimeStamp = GetTime()
-    MailMessage["Subject"] = (f"Hentai@Home Alert {MailTimeStamp}")
+    MailMessage["Subject"] = (f"Alert | {MailTimeStamp}")
     MailMessage["From"] = MailAccount
     MailMessage["To"] = MailReceiver
     try:
@@ -224,8 +218,7 @@ def SendAlertMail(MailPayload,MailOption=(),ConfigFilePath=()):
         # Sending
         SmtpServer.sendmail(MailAccount,[MailReceiver],MailMessage.as_string())
         # Close connection
-        ConnectCloseMessage = SmtpServer.quit()
-        print(ConnectCloseMessage)
+        SmtpServer.quit()
         # Retun mail text
         return MailPayload
     except Exception as ErrorStatus:
@@ -233,23 +226,18 @@ def SendAlertMail(MailPayload,MailOption=(),ConfigFilePath=()):
         return False
 
 # Sending telegram message via bots
-def SendAlertTelegram(TelegramPayload,TelegramOption=(),ConfigFilePath=()):
-    # Option, load configuration
-    if not TelegramOption:
-        TelegramConfig = Configuration(ConfigFilePath)
-        # Configuration not found
-        if len(TelegramConfig["telegram_token"]) == 0:
-            MessageSending = "Telegram Configuration not found, please initialize."
-            logging.error(MessageSending)
-            return 404
-        # Find configuration
-        else:
-            TelegramBotToken = TelegramConfig["telegram_token"]
-            TelegramReceiver = TelegramConfig["telegram_id"]
-    # Option, manually setting configuration
-    elif type(TelegramOption) is list:
-        TelegramBotToken = TelegramOption[0]
-        TelegramReceiver = TelegramOption[1]
+def SendAlertTelegram(TelegramPayload,ConfigFilePath):
+    # Load configuration
+    TelegramConfig = Configuration(ConfigFilePath)
+    # Configuration not found
+    if len(TelegramConfig["telegram_token"]) == 0:
+        MessageSending = "Telegram Configuration not found, please initialize."
+        logging.error(MessageSending)
+        return 404
+    # Find configuration
+    else:
+        TelegramBotToken = TelegramConfig["telegram_token"]
+        TelegramReceiver = TelegramConfig["telegram_id"]
     # Make telegram url
     TelegramBotURL = f"https://api.telegram.org/bot{TelegramBotToken}/sendMessage"
     TelegramJsonPayload = {"chat_id":TelegramReceiver,"text":TelegramPayload}

@@ -1,4 +1,5 @@
-#coding=utf-8
+# -*- coding: utf-8 -*-
+import sys
 import time
 import schedule
 import status4hentai
@@ -73,5 +74,6 @@ except KeyboardInterrupt:
     EventUpdate = "Program has stopped working"
     status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
     print(f"\r\n{ExitTime} | Thank you for using the status recoder.\r\nGoodBye ...")
+    sys.exit(0)
 
 # 2023_07_23
