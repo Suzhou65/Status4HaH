@@ -1,7 +1,7 @@
 # Status4HaH
 [![python](https://github.takahashi65.info/lib_badge/python.svg)](https://www.python.org/)
 [![python version](https://github.takahashi65.info/lib_badge/python-3.6.svg)](https://www.python.org/) 
-[![UA](https://github.takahashi65.info/lib_badge/active_development.svg)](https://github.com/Suzhou65/Status4HaH)
+[![UA](https://github.takahashi65.info/lib_badge/active_maintenance.svg)](https://github.com/Suzhou65/Status4HaH)
 [![Size](https://img.shields.io/github/repo-size/Suzhou65/Status4HaH)](https://shields.io/category/size)
 
 Status check for Hentai@Home Client.
@@ -38,10 +38,15 @@ Status check for Hentai@Home Client.
 You need to have E-Hentai account, and already running Hentai@Home client.
 ### Scheduling and server loading
 - Scheduling  
-Using schedule module for job scheduling, you can found the scheduling setting at scripts examples.
-- Avoiding for making heavy server load on E-Hentai
+Using schedule module for job scheduling, configuration in demonstration script.
+```python
+# Execute setting
+schedule.every(30).minutes.do(notification,)
+```
+- Avoiding for making heavy server load on E-Hentai.
 ```diff
-- Default interval at scripts is 30 minutes, not recommended for change less then 30 minutes.
+- Default interval at scripts is 30 minutes.
+- Not recommended for change less then 30 minutes.
 ```
 
 ### E-Hentai account
@@ -67,9 +72,9 @@ Mail configuration not found, please initialize.
 ```
 And return integer values ```404```.
 ### Telegram alert
-- Using Telegram BOTs, contect [BotFather](https://t.me/botfather) create new bot accounts.
+- Using Telegram Bot, contect [BotFather](https://t.me/botfather) create new Bot accounts.
 - HTTP ```API Token``` and ```chat id``` are needed.
-- If the chat channel wasn't create, Telegram API will return HTTP code 400.
+- If the chat channel wasn't create, Telegram API will return ```HTTP 400 Bad Request```, you need to start chat channel including that Bot.
 
 First time running Telegram alert function, it will check configuration file. If mail configuration not found, it will print alert.
 ```text
@@ -104,7 +109,7 @@ Some module not included in [Python Standard Library](https://docs.python.org/3/
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
 
 ## Security and Disclaimer
-Although **ipb_pass_hash** is the password which has been hashed.
+Although **ipb_pass_hash** is the password which has been hashed:
 ```diff
 - If someone modify the script, adding function to send it back with ipb_member_id.
 - it's possible to login your account without knowing the actual username and password.
@@ -131,8 +136,8 @@ ResponPayload = status4hentai.CheckHentaiatHome(ConfigFilePath)
 DataTableOutput = status4hentai.GetHentaiStatus(ResponPayload)
 ```
 - It will return ```Pandas DataFrame``` if parsing HTML content correctly.
-- If return ```string``` means controllable error, like server error or logout,
-- If return ```boolean``` means exception error.
+- If return ```string``` means controllable error, like server error or logout, that string maybe HTTP Status Code, or Python requests function timeout.
+- If return ```boolean``` means exception error, please check ```status4hah.error.log``` for error handling.
 ### Offline notification
 - The demonstration script is```status_notification.py```.
 - Configuration as follows are needed.
@@ -143,7 +148,9 @@ ConfigFilePath = "status4hah.config.json"
 CheckingResultPath = "status4hah.check.csv"
 # Create status file
 StatusFilePath = "status4hah.status.csv"
-# Alert mode selection
+# Alert selection
+# 0 > Mail alert
+# 1 > Telegram alert (Default)
 AlertMode = 0
 ```
 ### Status recorder
@@ -177,7 +184,6 @@ See the [Example](https://takahashi65.info/page/status_monitor.php), and the [Sc
 - getpass
 - BeautifulSoup
 - MIMEText
-
 ### Webpage
 - Apache or NGINX
 - php 7.3 or above
@@ -189,14 +195,11 @@ General Public License -3.0
 ### Beautiful Soup
 - [Beautiful Soup 4.9.0 documentation](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
 - [Beautiful Soup 4.4.0 documentation, Zh-CN](https://beautifulsoup.readthedocs.io/zh_CN/v4.4.0/)
-
 ### E-Hentai
 - [About Hentai@Home](https://ehwiki.org/wiki/Hentai@Home)
-
 ### Install HentaiatHome
 - [Raspbian install Hentai@Home, setting environment](https://gist.github.com/Suzhou65/3323c05432c0276487c6e21486e3ca80)
 - [Raspbian install Hentai@Home, mount external hard drive](https://gist.github.com/Suzhou65/a68c44f343953fc245f6d4438cdbab77)
 - [Raspbian install Hentai@Home, initialization are starting](https://gist.github.com/Suzhou65/8207e6c7487bf303cc7615ad94352e42)
-
 ### Stack Overflow
 - [python BeautifulSoup parsing table](https://stackoverflow.com/questions/23377533/python-beautifulsoup-parsing-table)

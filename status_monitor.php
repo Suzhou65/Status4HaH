@@ -53,7 +53,7 @@
             <?php
             header("refresh:600");
             // File path as you python script location
-            if ($file = fopen("/python_script_location/status_monitor.csv","r")){
+            if ($file = fopen("/script_location/status4hah.check.csv","r")){
                 while (($line = fgetcsv($file)) !== false){
                     echo "<tr>";
                     foreach ($line as $cell) {echo "<td>" . htmlspecialchars($cell) . "</td>";}
@@ -74,7 +74,7 @@
             <?php
             header("refresh:600");
             // File path as you python script location
-            if ($file = fopen("/python_script_location/status_program.csv","r")){
+            if ($file = fopen("/script_location/status4hah.status.csv","r")){
                 while (($line = fgetcsv($file)) !== false){
                     echo "<tr>";
                     foreach ($line as $cell) {echo "<td>" . htmlspecialchars($cell) . "</td>";}

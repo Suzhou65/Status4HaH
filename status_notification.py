@@ -95,7 +95,7 @@ except KeyboardInterrupt:
     ExitTime = status4hentai.GetTime()
     EventUpdate = "Program has stopped working"
     status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
-    print(f"\r\n{ExitTime} | Thank you for using the status recoder.\r\nGoodBye ...")
+    print(f"\r\n{ExitTime} | Thank you for using the server watcher.\r\nGoodBye ...")
     sys.exit(0)
 
 # 2023_07_23
