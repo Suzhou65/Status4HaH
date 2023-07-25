@@ -41,7 +41,7 @@ You need to have E-Hentai account, and already running Hentai@Home client.
 Using schedule module for job scheduling, configuration in demonstration script.
 ```python
 # Execute setting
-schedule.every(30).minutes.do(notification,)
+schedule.every(30).minutes.do(notification)
 ```
 - Avoiding for making heavy server load on E-Hentai.
 ```diff
@@ -109,11 +109,12 @@ Some module not included in [Python Standard Library](https://docs.python.org/3/
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
 
 ## Security and Disclaimer
-Although **ipb_pass_hash** is the password which has been hashed:
+Although password inside cookie has been hashed, If someone modify the script, adding Backdoor function to send it back.
 ```diff
-- If someone modify the script, adding function to send it back with ipb_member_id.
-- it's possible to login your account without knowing the actual username and password.
-+ Original Status4HaH won't have those function.
+- It's possible to login your account without knowing the actual username and password.
+```
+Original Status4HaH won't have those function.
+```diff
 + Please make sure you download the clean copy from this Repository.
 ```
 
