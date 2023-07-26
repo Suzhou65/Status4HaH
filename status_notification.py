@@ -20,11 +20,11 @@ def notification(ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode):
     # Check Hentai@Home status
     DataTableOutput = status4hentai.GetHentaiStatus(ResponPayload)
     # Check output
-    # Get boolean, means error
+    # Get boolean, means exception error
     if type(DataTableOutput) is bool:
         TimeStamp = status4hentai.GetTime()
         # Error message
-        EventUpdate = "Error occurred when running program, check log."
+        EventUpdate = "Exception error occurred, check log."
         # Write status file
         status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
         # Print message

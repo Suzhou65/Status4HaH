@@ -118,9 +118,9 @@ def CheckHentaiatHome(ConfigFilePath):
             return HentaiAtHomeRespon.status_code
     # If timeout
     except requests.exceptions.Timeout as ErrorTimeOut:
-        MessageCheck = "RequestsTimeOut"
+        MessageCheck = "Python Requests TimeOut"
         logging.warning(ErrorTimeOut)
-        # Return bool
+        # Return string
         return MessageCheck
     # Error handling
     except Exception as ErrorStatus:
@@ -175,13 +175,14 @@ def GetHentaiStatus(ResponPayload):
             return pandas.DataFrame(ContentList,columns=ContentHeader)
     # Get string, connecting Timeout
     elif type(ResponPayload) is str:
-        MessageParsing = ("Python RequestsTimeOut")
-        logging.warning(MessageParsing)
-        return MessageParsing
+        logging.warning(ResponPayload)
+        # Return string with Requests timeout messege
+        return ResponPayload
     # Get integer, maybe server error
     elif type(ResponPayload) is int:
         MessageParsing = (f"HTTP Error {ResponPayload}")
         logging.warning(MessageParsing)
+        # Return string with HTTP Status code
         return MessageParsing
     # Get exception error input, the worst case
     else:

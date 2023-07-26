@@ -18,11 +18,11 @@ def StatusRecorder(ConfigFilePath,RecordingPath,StatusFilePath):
     # Check Hentai@Home status
     DataTableOutput = status4hentai.GetHentaiStatus(ResponPayload)
     # Check output
-    # Get boolean, means error
+    # Get boolean, means exception error
     if type(DataTableOutput) is bool:
         TimeStamp = status4hentai.GetTime()
         # Error message
-        EventUpdate = "Error occurred when running program, check log."
+        EventUpdate = "Exception error occurred, check log."
         # Write status file
         status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
         # Print message
@@ -39,7 +39,7 @@ def StatusRecorder(ConfigFilePath,RecordingPath,StatusFilePath):
     # Get pandas DataFrame
     else:
         # Drop columns config
-        DataTableFilter = ["Created","Client IP","Port","Version","Max Speed"]
+        DataTableFilter = ["Created","Client IP","Port","Version","Max Speed","Country"]
         # Drop unneeded columns
         DataTableOutput.drop(columns=DataTableFilter,inplace=True)
         # Saving
