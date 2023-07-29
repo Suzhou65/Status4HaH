@@ -154,6 +154,7 @@ StatusFilePath = "status4hah.status.csv"
 # 1 > Telegram alert (Default)
 AlertMode = 0
 ```
+The function will return ```string``` if messege sending successfully.
 ### Status recorder
 - The demonstration script is```status_recorder.py```.
 - Configuration as follows are needed.
@@ -187,7 +188,7 @@ See the [Example](https://takahashi65.info/page/status_monitor.php), and the [Sc
 - MIMEText
 ### Webpage
 - Apache or NGINX
-- php 7.3 or above
+- php 7.3 or above, recommend using php-FPM
 
 ## License
 General Public License -3.0
@@ -195,7 +196,6 @@ General Public License -3.0
 ## Resources
 ### Beautiful Soup
 - [Beautiful Soup 4.9.0 documentation](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
-- [Beautiful Soup 4.4.0 documentation, Zh-CN](https://beautifulsoup.readthedocs.io/zh_CN/v4.4.0/)
 ### E-Hentai
 - [About Hentai@Home](https://ehwiki.org/wiki/Hentai@Home)
 ### Install HentaiatHome

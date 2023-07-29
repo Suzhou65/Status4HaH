@@ -42,6 +42,8 @@ def notification(ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode):
     else:
         # Drop columns config
         DataTableFilter = ["ID","Created","Client IP","Port","Version","Max Speed","Country"]
+        # Drop columns config in alert
+        DataTableFilterAlert = ["Files Served","Trust","Quality","Hitrate","Hathrate"]
         # Drop unneeded columns
         DataTableOutput.drop(columns=DataTableFilter,inplace=True)
         # Saving to checking result
@@ -54,13 +56,17 @@ def notification(ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode):
             EventUpdate = "Server offline, sending alert."
             status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
             print(f"{TimeStamp} | {EventUpdate}")
+            # Drop unneeded columns again
+            DataTableOutput.drop(columns=DataTableFilterAlert,inplace=True)
+            # Translate into dictionary
+            StatsusDict = DataTableOutput.to_dict(orient="records")
             # Mail alert
             if AlertMode == 0:
-                MailPayload = "Hentai@Home server is offline."
+                MailPayload = f"Hentai@Home server is currently offline.\r\n\r\n{str(StatsusDict)}"
                 AlertAction = status4hentai.SendAlertMail(MailPayload,ConfigFilePath)
             # Telegram alert
             else:
-                TelegramPayload = f"{TimeStamp}\r\nHentai@Home server is offline."
+                TelegramPayload = f"Hentai@Home server is currently offline.\r\n\r\n{str(StatsusDict)}"
                 AlertAction = status4hentai.SendAlertTelegram(TelegramPayload,ConfigFilePath)
             # Check alert action result
             if type(AlertAction) is str:
