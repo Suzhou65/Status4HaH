@@ -4,6 +4,8 @@ import time
 import schedule
 import status4hentai
 
+# Schedule period
+Period = 30
 # Configuration file path
 ConfigFilePath = "status4hah.config.json"
 # Recording file path
@@ -51,12 +53,12 @@ def StatusRecorder(ConfigFilePath,RecordingPath,StatusFilePath):
         print(f"{TimeStamp} | {EventUpdate}")
 
 # Execute setting
-schedule.every(30).minutes.do(StatusRecorder,ConfigFilePath,RecordingPath,StatusFilePath)
+schedule.every(Period).minutes.do(StatusRecorder,ConfigFilePath,RecordingPath,StatusFilePath)
 # Running
 EventUpdate = "Program start"
 status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
 InitializeTime = status4hentai.GetTime()
-print(f"{InitializeTime} | Now recording, pressing Control + C to exit.")
+print(f"{InitializeTime} | Now recording, period is {Period} mintues. Pressing Control + C to exit.")
 # Loop
 try:
     while True:

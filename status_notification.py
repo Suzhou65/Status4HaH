@@ -4,6 +4,8 @@ import time
 import schedule
 import status4hentai
 
+# Schedule period
+Period = 30
 # Configuration file path
 ConfigFilePath = "status4hah.config.json"
 # Status file path
@@ -58,15 +60,19 @@ def notification(ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode):
             print(f"{TimeStamp} | {EventUpdate}")
             # Drop unneeded columns again
             DataTableOutput.drop(columns=DataTableFilterAlert,inplace=True)
+            # Choice offline server only
+            DataTableOutput = DataTableOutput.loc[DataTableOutput["Status"] == "Offline"]
             # Translate into dictionary
             StatsusDict = DataTableOutput.to_dict(orient="records")
+            # Translate dictionary into string
+            StatsusString = str(StatsusDict).replace("[","").replace("]","").replace("}, {","},\r\n{")
             # Mail alert
             if AlertMode == 0:
-                MailPayload = f"Hentai@Home server is currently offline.\r\n\r\n{str(StatsusDict)}"
+                MailPayload = f"Hentai@Home server is currently offline.\r\n\r\n{StatsusString}"
                 AlertAction = status4hentai.SendAlertMail(MailPayload,ConfigFilePath)
             # Telegram alert
             else:
-                TelegramPayload = f"Hentai@Home server is currently offline.\r\n\r\n{str(StatsusDict)}"
+                TelegramPayload = f"Hentai@Home server is currently offline.\r\n\r\n{StatsusString}"
                 AlertAction = status4hentai.SendAlertTelegram(TelegramPayload,ConfigFilePath)
             # Check alert action result
             if type(AlertAction) is str:
@@ -79,12 +85,12 @@ def notification(ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode):
             status4hentai.ProgramCurrentStatus(StatusFilePath)
 
 # Execute setting
-schedule.every(30).minutes.do(notification,ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode)
+schedule.every(Period).minutes.do(notification,ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode)
 # Running
 EventUpdate = "Program start"
 status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
 InitializeTime = status4hentai.GetTime()
-print(f"{InitializeTime} | Now checking, pressing Control + C to exit.")
+print(f"{InitializeTime} | Now checking, period is {Period} mintues. Pressing Control + C to exit.")
 # Loop
 try:
     while True:
@@ -104,4 +110,4 @@ except KeyboardInterrupt:
     print(f"\r\n{ExitTime} | Thank you for using the server watcher.\r\nGoodBye ...")
     sys.exit(0)
 
-# 2023_07_23
+# 2023_08_03
