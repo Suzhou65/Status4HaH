@@ -12,7 +12,7 @@ from email.mime.text import MIMEText
 # Error handling, message config
 FORMAT = "%(asctime)s |%(levelname)s |%(message)s"
 # Error file
-logging.basicConfig(level=logging.WARNING, filename="status4hah.error.log",filemode="a",format=FORMAT)
+logging.basicConfig(level=logging.WARNING,filename="status4hah.error.log",filemode="a",format=FORMAT)
 
 # Time
 def GetTime():
@@ -52,16 +52,18 @@ def Configuration(ConfigFilePath,ConfigUpdate=()):
             # Input basic configuration
             ipb_member_id = getpass("Please enter the ipb_member_id: ")
             ipb_pass_hash = getpass("Please enter the ipb_pass_hash: ")
-            ipb_session = getpass("Please enter the ipb_session_id: ")
             initialize_time = GetTime()
             # Dictionary
             ConfigInitialize = {
                 # Recording configuration update time
                 "last_update":initialize_time,
+                # Check flag
+                "status_check_flag":0,
                 # EHentai-Cookie
                 "ipb_member_id":ipb_member_id,
                 "ipb_pass_hash":ipb_pass_hash,
-                "ipb_session_id":ipb_session,
+                # User-Agent
+                "request_header":"",
                 # Google Mail as sneder
                 "mail_sender":"",
                 "mail_scepter":"",
@@ -92,17 +94,17 @@ def Configuration(ConfigFilePath,ConfigUpdate=()):
 
 # Check Hentai@Home
 def CheckHentaiatHome(ConfigFilePath):
-    # Request User-agent
-    RequestHeaders = {"user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.82"}
     # Hentai@Home page
     HentaiAtHomePage = "https://e-hentai.org/hentaiathome.php"
-    # Make SignIn Cookie
-    CookiePayload = Configuration(ConfigFilePath)
-    ipbm = CookiePayload["ipb_member_id"]
-    ipbp = CookiePayload["ipb_pass_hash"]
-    ibps = CookiePayload["ipb_session_id"]
+    # Get cookie and header config
+    GetPayload = Configuration(ConfigFilePath)
     # Make cookies
-    BrowserCookies = {"ipb_member_id":ipbm,"ipb_pass_hash":ipbp,"ipb_session_id":ibps}
+    ipbm = GetPayload["ipb_member_id"]
+    ipbp = GetPayload["ipb_pass_hash"]
+    BrowserCookies = {"ipb_member_id":ipbm,"ipb_pass_hash":ipbp}
+    # Make user-agent
+    Headers = GetPayload["request_header"]
+    RequestHeaders = {"user-agent":Headers}
     # Get hentaiathome page
     try:
         HentaiAtHomeRespon = requests.get(HentaiAtHomePage,headers=RequestHeaders,cookies=BrowserCookies,timeout=10)
@@ -136,11 +138,11 @@ def GetHentaiStatus(ResponPayload):
         # Parsing bytes to HTML
         ResponPayloadHTML = BeautifulSoup(ResponPayload,"html.parser")
         # Finding table named hct
-        TableHCT = ResponPayloadHTML.find("table",{"class":"hct"})
+        TableHCT = ResponPayloadHTML.find("table",id="hct")
         # Chech logout or other situations
         if not TableHCT:
             # Try to find login table
-            TableLogIn = ResponPayloadHTML.find("div",{"class":"d"})
+            TableLogIn = ResponPayloadHTML.find("table",id="d")
             # Something worse
             if not TableLogIn:
                 MessageParsing = "Error occurred when parsing HTML."
@@ -188,73 +190,75 @@ def GetHentaiStatus(ResponPayload):
     else:
         return False
 
-# Sending mail
-def SendAlertMail(MailPayload,ConfigFilePath):
+# Sending alert
+def SendAlert(Mode,ConfigFilePath,MessagePayload):
     # Load configuration
-    MailConfig = Configuration(ConfigFilePath)
-    # Configuration not found
-    if len(MailConfig["mail_sender"]) == 0:
-        MessageSending = "Mail configuration not found, please initialize."
-        logging.error(MessageSending)
-        return 404
-    # Find configuration
-    else:
-        MailAccount = MailConfig["mail_sender"]
-        MailPassword = MailConfig["mail_scepter"]
-        MailReceiver = MailConfig["mail_receiver"]
-    # Sending mail via gmail
-    MailMessage = MIMEText(MailPayload)
-    MailTimeStamp = GetTime()
-    MailMessage["Subject"] = (f"Alert | {MailTimeStamp}")
-    MailMessage["From"] = MailAccount
-    MailMessage["To"] = MailReceiver
-    try:
-        # Connect to gmail server
-        SmtpServer = smtplib.SMTP("smtp.gmail.com",587)
-        SmtpServer.ehlo()
-        SmtpServer.starttls()
-        SmtpServer.ehlo
-        SmtpServer.login(MailAccount,MailPassword)
-        # Sending
-        SmtpServer.sendmail(MailAccount,[MailReceiver],MailMessage.as_string())
-        # Close connection
-        SmtpServer.quit()
-        # Retun mail text
-        return MailPayload
-    except Exception as ErrorStatus:
-        logging.exception(ErrorStatus)
-        return False
-
-# Sending telegram message via bots
-def SendAlertTelegram(TelegramPayload,ConfigFilePath):
-    # Load configuration
-    TelegramConfig = Configuration(ConfigFilePath)
-    # Configuration not found
-    if len(TelegramConfig["telegram_token"]) == 0:
-        MessageSending = "Telegram configuration not found, please initialize."
-        logging.error(MessageSending)
-        return 404
-    # Find configuration
-    else:
-        TelegramBotToken = TelegramConfig["telegram_token"]
-        TelegramReceiver = TelegramConfig["telegram_id"]
-    # Make telegram url
-    TelegramBotURL = f"https://api.telegram.org/bot{TelegramBotToken}/sendMessage"
-    TelegramJsonPayload = {"chat_id":TelegramReceiver,"text":TelegramPayload}
-    # Sending mail via telegram
-    try:
-        TelegramResponse = requests.post(TelegramBotURL,json=TelegramJsonPayload)
-        if TelegramResponse.status_code == 200:
-            TelegramResponse.close()
-            # Return payload
-            return TelegramPayload
-        # If not
+    MessageConfig = Configuration(ConfigFilePath)
+    # Sending telegram message via bots
+    if Mode == 0:
+        # Ckeck configuration
+        if len(MessageConfig["telegram_token"]) == 0:
+            MessageSending = "Telegram configuration not found, please initialize."
+            logging.error(MessageSending)
+            return 404
+        # Find configuration
         else:
-            TelegramResponse.close()
-            # Return integer
-            return TelegramResponse.status_code
-    except Exception as ErrorStatus:
-        logging.exception(ErrorStatus)
-        return False
-
-# 2023_07_23
+            TelegramBotToken = MessageConfig["telegram_token"]
+            TelegramReceiver = MessageConfig["telegram_id"]
+            # Make telegram url
+            TelegramBotURL = f"https://api.telegram.org/bot{TelegramBotToken}/sendMessage"
+            TelegramJsonPayload = {"chat_id":TelegramReceiver,"text":MessagePayload}
+            # Sending telegram 
+            try:
+                TelegramResponse = requests.post(TelegramBotURL,json=TelegramJsonPayload)
+                if TelegramResponse.status_code == 200:
+                    TelegramResponse.close()
+                    # Return payload
+                    return MessagePayload
+                # Chat channel wasn't create
+                elif TelegramResponse.status_code == 400:
+                    # Return 400 Bad request
+                    return 400
+                # Other error
+                else:
+                    TelegramResponse.close()
+                    # Return integer
+                    return TelegramResponse.status_code
+            except Exception as ErrorStatus:
+                logging.exception(ErrorStatus)
+                return False
+    # Sending mail via Gmail
+    else:
+        # Ckeck configuration
+        if len(MessageConfig["mail_sender"]) == 0:
+            MessageSending = "Mail configuration not found, please initialize."
+            logging.error(MessageSending)
+            return 404
+        # Find configuration
+        else:
+            MailAccount = MessageConfig["mail_sender"]
+            MailPassword = MessageConfig["mail_scepter"]
+            MailReceiver = MessageConfig["mail_receiver"]
+            # Sending mail via gmail
+            MailMessage = MIMEText(MessagePayload)
+            MailTimeStamp = GetTime()
+            MailMessage["Subject"] = (f"Alert | {MailTimeStamp}")
+            MailMessage["From"] = MailAccount
+            MailMessage["To"] = MailReceiver
+            try:
+                # Connect to gmail server
+                SmtpServer = smtplib.SMTP("smtp.gmail.com",587)
+                SmtpServer.ehlo()
+                SmtpServer.starttls()
+                SmtpServer.ehlo
+                SmtpServer.login(MailAccount,MailPassword)
+                # Sending
+                SmtpServer.sendmail(MailAccount,[MailReceiver],MailMessage.as_string())
+                # Close connection
+                SmtpServer.quit()
+                # Retun mail text
+                return MessagePayload
+            except Exception as ErrorStatus:
+                logging.exception(ErrorStatus)
+                return False
+# 2023_11_03
