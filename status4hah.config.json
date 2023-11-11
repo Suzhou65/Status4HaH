@@ -1,9 +1,8 @@
 {
   "last_update_time": "",
-  "status_check_flag":0,
   "ipb_member_id": "",
   "ipb_pass_hash": "",
-  "request_header": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+  "request_header": "",
   "mail_sender": "",
   "mail_scepter": "",
   "mail_receiver": "",

@@ -57,12 +57,10 @@ def Configuration(ConfigFilePath,ConfigUpdate=()):
             ConfigInitialize = {
                 # Recording configuration update time
                 "last_update":initialize_time,
-                # Check flag
-                "status_check_flag":0,
                 # EHentai-Cookie
                 "ipb_member_id":ipb_member_id,
                 "ipb_pass_hash":ipb_pass_hash,
-                # User-Agent
+                # Broswer User-Agent
                 "request_header":"",
                 # Google Mail as sneder
                 "mail_sender":"",
@@ -191,11 +189,11 @@ def GetHentaiStatus(ResponPayload):
         return False
 
 # Sending alert
-def SendAlert(Mode,ConfigFilePath,MessagePayload):
+def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
     # Load configuration
     MessageConfig = Configuration(ConfigFilePath)
     # Sending telegram message via bots
-    if Mode == 0:
+    if AlertMode == 0:
         # Ckeck configuration
         if len(MessageConfig["telegram_token"]) == 0:
             MessageSending = "Telegram configuration not found, please initialize."
@@ -261,4 +259,4 @@ def SendAlert(Mode,ConfigFilePath,MessagePayload):
             except Exception as ErrorStatus:
                 logging.exception(ErrorStatus)
                 return False
-# 2023_11_03
+# 2023_11_12
