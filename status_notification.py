@@ -13,6 +13,10 @@ AlertMode = 0
 
 # Function
 def StatusChecker(ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode):
+    # Read alert sending status
+    ReadConfiguration = status4hentai.Configuration(ConfigFilePath)
+    # Get status value
+    AlertFlag = ReadConfiguration["alert_counting"]
     # Get Hentai@Home Page
     ResponPayload = status4hentai.CheckHentaiatHome(ConfigFilePath)
     # Check Hentai@Home status
@@ -52,30 +56,53 @@ def StatusChecker(ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode):
             StatsusDict = DataTableOutput.to_dict(orient="records")
             # Translate dictionary into string
             StatsusString = str(StatsusDict).replace("[","").replace("]","").replace("}, {","},\r\n{")
-            # Alert payload
-            MessagePayload = f"Hentai@Home server is currently offline.\r\n\r\n{StatsusString}"
-            # Sending alert
-            AlertAction = status4hentai.SendAlert(AlertMode,ConfigFilePath,MessagePayload)
-            # Check sending success or not
-            if type(AlertAction) is str:
-                # Sending successfully
-                EventUpdate = "Server offline, alert sending successfully."
+            # Check alert sending count
+            if AlertFlag == True:
+                # Server still offline, alert already sent
+                EventUpdate = "Server offline, alert already senting."
                 status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
-            elif AlertAction == 404:
-                # configuration not found
-                EventUpdate = "Unable sending offline alert due to configuration not found."
-                status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
-            elif AlertAction == 400:
-                # Chat channel wasn't create
-                EventUpdate = "Unable sending offline alert, chat channel wasn't create."
-                status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
-            else:
-                # Error handling
-                EventUpdate = "Error occurred when sending offline alert."
-                status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)    
+            elif AlertFlag == False:
+                # Alert payload
+                MessagePayload = f"Hentai@Home server is currently offline.\r\n\r\n{StatsusString}"
+                # Sending alert
+                AlertAction = status4hentai.SendAlert(AlertMode,ConfigFilePath,MessagePayload)
+                # Check sending success or not
+                if type(AlertAction) is str:
+                    # Sending successfully
+                    EventUpdate = "Server offline, alert sending successfully."
+                    status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
+                    # Update alert sending status
+                    ConfigUpdate = ReadConfiguration
+                    # Flip sending status
+                    ConfigUpdate["alert_counting"] = True
+                    # Update configuration
+                    ReadConfiguration = status4hentai.Configuration(ConfigFilePath,ConfigUpdate)
+                elif AlertAction == 404:
+                    # configuration not found
+                    EventUpdate = "Unable sending alert due to configuration not found."
+                    status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
+                elif AlertAction == 400:
+                    # Chat channel wasn't create
+                    EventUpdate = "Unable sending alert, chat channel wasn't create."
+                    status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
+                else:
+                    # Error handling
+                    EventUpdate = "Error occurred when sending alert."
+                    status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
         # All server is online
         else:
             status4hentai.ProgramCurrentStatus(StatusFilePath)
+            # Update alert sending status
+            if AlertFlag == True:
+                # Reset alert sending status
+                ConfigUpdate = ReadConfiguration
+                # Flip sending status
+                ConfigUpdate["alert_counting"] = False
+                # Update configuration
+                ReadConfiguration = status4hentai.Configuration(ConfigFilePath,ConfigUpdate)
+            else:
+                pass
+
 # Running program
 try:
     StatusChecker(ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode)

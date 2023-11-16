@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.WARNING,filename="status4hah.error.log",filemo
 # Time
 def GetTime():
     CurrentTime = datetime.datetime.now()
-    return CurrentTime.strftime("%Y-%m-%d %H:%M:%S")
+    return CurrentTime.strftime("%Y-%m-%d %H:%M")
 
 # Program running status
 def ProgramCurrentStatus(StatusFilePath,EventUpdate=()):
@@ -52,11 +52,11 @@ def Configuration(ConfigFilePath,ConfigUpdate=()):
             # Input basic configuration
             ipb_member_id = getpass("Please enter the ipb_member_id: ")
             ipb_pass_hash = getpass("Please enter the ipb_pass_hash: ")
-            initialize_time = GetTime()
+            configuration_update = GetTime()
             # Dictionary
             ConfigInitialize = {
                 # Recording configuration update time
-                "last_update":initialize_time,
+                "last_update":configuration_update,
                 # EHentai-Cookie
                 "ipb_member_id":ipb_member_id,
                 "ipb_pass_hash":ipb_pass_hash,
@@ -70,7 +70,9 @@ def Configuration(ConfigFilePath,ConfigUpdate=()):
                 # Telegram BOT token
                 "telegram_token":"",
                 # Telegram ID receive
-                "telegram_id":""
+                "telegram_id":"",
+                # Check flag
+                "alert_counting":False
                 }
             # Save configuration file
             with open(ConfigFilePath,"w") as ConfigurationFile:
@@ -259,4 +261,5 @@ def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
             except Exception as ErrorStatus:
                 logging.exception(ErrorStatus)
                 return False
+            
 # 2023_11_12

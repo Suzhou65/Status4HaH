@@ -7,5 +7,6 @@
   "mail_scepter": "",
   "mail_receiver": "",
   "telegram_token": "",
-  "telegram_id": ""
+  "telegram_id": "",
+  "alert_counting":false
 }
