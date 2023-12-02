@@ -132,8 +132,7 @@ def CheckHentaiatHome(ConfigFilePath):
 
 # Parsing HTML and get status table
 def GetHentaiStatus(ResponPayload):
-    # Check respon payload
-    # Get bytes, maybe is HTML payload
+    # Check respon payload. Get bytes, maybe is HTML payload
     if type(ResponPayload) is bytes:
         # Parsing bytes to HTML
         ResponPayloadHTML = BeautifulSoup(ResponPayload,"html.parser")
@@ -262,4 +261,4 @@ def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
                 logging.exception(ErrorStatus)
                 return False
             
-# 2023_11_12
+# 2023_11_16

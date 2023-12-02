@@ -21,8 +21,7 @@ def StatusChecker(ConfigFilePath,CheckingResultPath,StatusFilePath,AlertMode):
     ResponPayload = status4hentai.CheckHentaiatHome(ConfigFilePath)
     # Check Hentai@Home status
     DataTableOutput = status4hentai.GetHentaiStatus(ResponPayload)
-    # Check output
-    # Get boolean, means exception error
+    # Check output. Get boolean, means exception error
     if type(DataTableOutput) is bool:
         # Error message
         EventUpdate = "Exception error occurred, check log."
@@ -114,4 +113,4 @@ except Exception:
     status4hentai.ProgramCurrentStatus(StatusFilePath,EventUpdate)
     sys.exit(0)
 
-# 2023_11_12
+# 2023_11_16

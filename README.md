@@ -39,21 +39,20 @@ Status check for Hentai@Home Client.
 You need to have E-Hentai account, and already running Hentai@Home client.
 ### Scheduling and server loading
 - Scheduling  
-Using schedule module for job scheduling, configuration in demonstration script.
-```python
-# Execute setting
-schedule.every(30).minutes.do(notification)
+Using Crontab for job scheduling.
+```shell
+#MIM HOUR DAY MONTH WEEK
+*/30  *    *    *    *    root  python /script_path/status_notification.py
 ```
 - Avoiding for making heavy server load on E-Hentai.
 ```diff
-- Default interval at scripts is 30 minutes.
 - Not recommended for change less then 30 minutes.
 ```
 
 ### E-Hentai account
 Using cookies to login, same as browser extension or viewer.
 
-If you browser is Chromium based, right click to opening Developer Tools, switch to ```Network``` panel. After refresh [Hentai@Home](https://e-hentai.org/hentaiathome.php) page, click the element call ```hentaiathome.php```, you can find ```ipb_member_id```, ```ipb_pass_hash```  and ```ipb_session_id``` at HTTP header.
+If you browser is Chromium based, right click to opening Developer Tools, switch to ```Network``` panel. After refresh [Hentai@Home](https://e-hentai.org/hentaiathome.php) page, click the element call ```hentaiathome.php```, you can find ```ipb_member_id``` and ```ipb_pass_hash``` at HTTP header.
 
 First time running this checker, it will asking the cookies.
 ```text
@@ -61,7 +60,6 @@ Configuration not found, please initialize.
 
 Please enter the ipb_member_id: 114514
 Please enter the ipb_pass_hash: ••••••••••••••••••••••••••••••••
-Please enter the ipb_session_id: ••••••••••••••••••••••••••••••••
 ```
 ### Email alert
 - Google account needed, sign in using App passwords.
@@ -90,15 +88,16 @@ And return integer values ```404```.
 You can editing the clean copy, which looks like this:
 ```json
 {
-  "last_update": "",
+  "last_update_time": "",
   "ipb_member_id": "",
   "ipb_pass_hash": "",
-  "ipb_session_id": "",
+  "request_header": "",
   "mail_sender": "",
   "mail_scepter": "",
   "mail_receiver": "",
   "telegram_token": "",
-  "telegram_id": ""
+  "telegram_id": "",
+  "alert_counting":false
 }
 ```
 If you fill in with correct configure, it will skip initialization check and alert.
@@ -106,7 +105,6 @@ If you fill in with correct configure, it will skip initialization check and ale
 ## Modules instantiation
 Some module not included in [Python Standard Library](https://docs.python.org/3/library/index.html) are needed.
 - [pandas](https://pypi.org/project/pandas/)
-- [schedule](https://pypi.org/project/schedule/)
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
 
 ## Security and Disclaimer
@@ -144,8 +142,6 @@ DataTableOutput = status4hentai.GetHentaiStatus(ResponPayload)
 - The demonstration script is```status_notification.py```.
 - Configuration as follows are needed.
 ```python
-# Schedule period
-Period = 30
 # Configuration file path
 ConfigFilePath = "status4hah.config.json"
 # Status file path
@@ -162,8 +158,6 @@ The function will return ```string``` if messege sending successfully.
 - The demonstration script is```status_recorder.py```.
 - Configuration as follows are needed.
 ```python
-# Schedule period
-Period = 30
 # Configuration file path
 ConfigFilePath = "status4hah.config.json"
 # Recording file path
