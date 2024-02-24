@@ -128,14 +128,28 @@ def CheckHentaiatHome(ConfigFilePath):
     except Exception as ErrorStatus:
         logging.exception(ErrorStatus)
         # Return bool
-        return ErrorStatus
+        return False
 
 # Parsing HTML and get status table
-def GetHentaiStatus(ResponPayload):
-    # Check respon payload. Get bytes, maybe is HTML payload
-    if type(ResponPayload) is bytes:
-        # Parsing bytes to HTML
-        ResponPayloadHTML = BeautifulSoup(ResponPayload,"html.parser")
+def GetHentaiStatus(HaHResponPayload):
+    # Check respon payload
+    if type(HaHResponPayload) is str:
+        # Get string, connecting Timeout
+        logging.warning(HaHResponPayload)
+        # Return string with Requests timeout messege
+        return HaHResponPayload
+    elif type(HaHResponPayload) is int:
+        # Get integer, maybe server error
+        MessageParsing = (f"HTTP Error {HaHResponPayload}")
+        logging.warning(MessageParsing)
+        # Return string with HTTP Status code
+        return MessageParsing
+    elif type(HaHResponPayload) is bool:
+        # Get exception error input, the worst case
+        return False
+    else:
+        # Get bytes, maybe is HTML payload, Parsing bytes to HTML
+        ResponPayloadHTML = BeautifulSoup(HaHResponPayload,"html.parser")
         # Finding table named hct
         TableHCT = ResponPayloadHTML.find("table",id="hct")
         # Chech logout or other situations
@@ -174,20 +188,6 @@ def GetHentaiStatus(ResponPayload):
             ContentList.pop(0)
             # Return Pandas dataframe
             return pandas.DataFrame(ContentList,columns=ContentHeader)
-    # Get string, connecting Timeout
-    elif type(ResponPayload) is str:
-        logging.warning(ResponPayload)
-        # Return string with Requests timeout messege
-        return ResponPayload
-    # Get integer, maybe server error
-    elif type(ResponPayload) is int:
-        MessageParsing = (f"HTTP Error {ResponPayload}")
-        logging.warning(MessageParsing)
-        # Return string with HTTP Status code
-        return MessageParsing
-    # Get exception error input, the worst case
-    else:
-        return False
 
 # Sending alert
 def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
@@ -260,5 +260,5 @@ def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
             except Exception as ErrorStatus:
                 logging.exception(ErrorStatus)
                 return False
-            
-# 2023_11_16
+
+# 2024_02_23
