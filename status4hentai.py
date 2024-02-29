@@ -33,10 +33,8 @@ def ProgramCurrentStatus(StatusFilePath,EventUpdate=()):
     status_output = pandas.DataFrame(data=[StatusTable],columns=StstusHeader)
     # Save to csv file
     status_output.to_csv(StatusFilePath,mode="w",index=False)
-    # Return as python table
-    return StatusTable
 
-# Configuration file
+# Configuration file read and write
 def Configuration(ConfigFilePath,ConfigUpdate=()):
     # Just read configuration
     if not ConfigUpdate:
@@ -120,10 +118,9 @@ def CheckHentaiatHome(ConfigFilePath):
             return HentaiAtHomeRespon.status_code
     # If timeout
     except requests.exceptions.Timeout as ErrorTimeOut:
-        MessageCheck = "Python Requests TimeOut"
         logging.warning(ErrorTimeOut)
-        # Return string
-        return MessageCheck
+        # Return integer
+        return 408
     # Error handling
     except Exception as ErrorStatus:
         logging.exception(ErrorStatus)
@@ -131,41 +128,29 @@ def CheckHentaiatHome(ConfigFilePath):
         return False
 
 # Parsing HTML and get status table
-def GetHentaiStatus(HaHResponPayload):
+def GetHentaiStatus(HentaiAtHomePayload):
     # Check respon payload
-    if type(HaHResponPayload) is str:
-        # Get string, connecting Timeout
-        logging.warning(HaHResponPayload)
-        # Return string with Requests timeout messege
-        return HaHResponPayload
-    elif type(HaHResponPayload) is int:
-        # Get integer, maybe server error
-        MessageParsing = (f"HTTP Error {HaHResponPayload}")
-        logging.warning(MessageParsing)
-        # Return string with HTTP Status code
-        return MessageParsing
-    elif type(HaHResponPayload) is bool:
-        # Get exception error input, the worst case
-        return False
+    if type(HentaiAtHomePayload) is int:
+        # Get integer, maybe server error or request timeout. Return string with HTTP Status code
+        return (f"HTTP Status Code: {HentaiAtHomePayload}")
+    elif type(HentaiAtHomePayload) is bool:
+        # Get exception input, the worst case
+        return ("Exception happened during processing of request Hentai@Home Status.")
     else:
         # Get bytes, maybe is HTML payload, Parsing bytes to HTML
-        ResponPayloadHTML = BeautifulSoup(HaHResponPayload,"html.parser")
-        # Finding table named hct
-        TableHCT = ResponPayloadHTML.find("table",id="hct")
+        HentaiAtHomePayload2HTML = BeautifulSoup(HentaiAtHomePayload,"html.parser")
+        # Finding table named hct, which contain HentaiAtHome status
+        TableHCT = HentaiAtHomePayload2HTML.find("table",id="hct")
         # Chech logout or other situations
         if not TableHCT:
             # Try to find login table
-            TableLogIn = ResponPayloadHTML.find("table",id="d")
+            TableLogIn = HentaiAtHomePayload2HTML.find("table",id="d")
             # Something worse
             if not TableLogIn:
-                MessageParsing = "Error occurred when parsing HTML."
-                logging.error(MessageParsing)
-                return MessageParsing
+                return ("Error occurred when parsing HTML payload.")
             # Somehow is logout
             else:
-                MessageParsing = "Cookie expires."
-                logging.error(MessageParsing)
-                return MessageParsing
+                return ("Cookie expires. Please update configuration file")
         # Get table correctly, start parsing
         else:
             # Makeing empty list
@@ -189,6 +174,36 @@ def GetHentaiStatus(HaHResponPayload):
             # Return Pandas dataframe
             return pandas.DataFrame(ContentList,columns=ContentHeader)
 
+# Save Pandas dataframe to CSV
+def SaveStatusTable(CheckFilePath,CheckTableInput,CheckFilter=()):
+    try:
+        if not CheckFilter:
+            CheckTableInput.to_csv(CheckFilePath,mode="w",index=False,header=True)
+            return CheckTableInput
+        else:
+            CheckTableInput.drop(columns=CheckFilter,inplace=True)
+            CheckTableInput.to_csv(CheckFilePath,mode="w",index=False,header=True)
+            return CheckTableInput
+    except Exception as ErrorStatus:
+        logging.exception(ErrorStatus)
+        return False
+
+# Trans Pandas dataframe to dictionary and string
+def Table2String(TableInput,DropFilter):
+    try:
+        # Drop unneeded columns again
+        TableInput.drop(columns=DropFilter,inplace=True)
+        # Choice offline server only
+        TableInput = TableInput.loc[TableInput["Status"] == "Offline"]
+        # Translate into dictionary
+        Table2Dict = TableInput.to_dict(orient="records")
+        # Translate dictionary into string
+        Dict2String = str(Table2Dict).replace("[","").replace("]","").replace("}, {","},\r\n{")
+        return Dict2String
+    except Exception as ErrorStatus:
+        logging.exception(ErrorStatus)
+        return False
+
 # Sending alert
 def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
     # Load configuration
@@ -198,8 +213,7 @@ def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
         # Ckeck configuration
         if len(MessageConfig["telegram_token"]) == 0:
             MessageSending = "Telegram configuration not found, please initialize."
-            logging.error(MessageSending)
-            return 404
+            return MessageSending
         # Find configuration
         else:
             TelegramBotToken = MessageConfig["telegram_token"]
@@ -213,16 +227,16 @@ def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
                 if TelegramResponse.status_code == 200:
                     TelegramResponse.close()
                     # Return payload
-                    return MessagePayload
+                    return 200
                 # Chat channel wasn't create
                 elif TelegramResponse.status_code == 400:
+                    TelegramResponse.close()
                     # Return 400 Bad request
-                    return 400
+                    return ("Chat channel wasn't create.")
                 # Other error
                 else:
                     TelegramResponse.close()
-                    # Return integer
-                    return TelegramResponse.status_code
+                    return (f"Telegram API respons: {TelegramResponse.status_code}")
             except Exception as ErrorStatus:
                 logging.exception(ErrorStatus)
                 return False
@@ -231,8 +245,7 @@ def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
         # Ckeck configuration
         if len(MessageConfig["mail_sender"]) == 0:
             MessageSending = "Mail configuration not found, please initialize."
-            logging.error(MessageSending)
-            return 404
+            return MessageSending
         # Find configuration
         else:
             MailAccount = MessageConfig["mail_sender"]
@@ -256,7 +269,7 @@ def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
                 # Close connection
                 SmtpServer.quit()
                 # Retun mail text
-                return MessagePayload
+                return 200
             except Exception as ErrorStatus:
                 logging.exception(ErrorStatus)
                 return False
