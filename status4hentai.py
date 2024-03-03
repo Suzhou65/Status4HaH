@@ -9,12 +9,12 @@ from getpass import getpass
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
 
-# Error handling, message config
+# For error handling, logfile config
 FORMAT = "%(asctime)s |%(levelname)s |%(message)s"
-# Error file
+# Error logfile name and level config
 logging.basicConfig(level=logging.WARNING,filename="status4hah.error.log",filemode="a",format=FORMAT)
 
-# Time
+# Generate timestamp
 def GetTime():
     CurrentTime = datetime.datetime.now()
     return CurrentTime.strftime("%Y-%m-%d %H:%M")
@@ -188,7 +188,7 @@ def SaveStatusTable(CheckFilePath,CheckTableInput,CheckFilter=()):
         logging.exception(ErrorStatus)
         return False
 
-# Trans Pandas dataframe to dictionary and string
+# Trans Pandas dataframe with offline server into dictionary and string
 def Table2String(TableInput,DropFilter):
     try:
         # Drop unneeded columns again
@@ -212,8 +212,7 @@ def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
     if AlertMode == 0:
         # Ckeck configuration
         if len(MessageConfig["telegram_token"]) == 0:
-            MessageSending = "Telegram configuration not found, please initialize."
-            return MessageSending
+            return ("Telegram configuration not found, please initialize.")
         # Find configuration
         else:
             TelegramBotToken = MessageConfig["telegram_token"]
@@ -244,8 +243,7 @@ def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
     else:
         # Ckeck configuration
         if len(MessageConfig["mail_sender"]) == 0:
-            MessageSending = "Mail configuration not found, please initialize."
-            return MessageSending
+            return ("Mail configuration not found, please initialize.")
         # Find configuration
         else:
             MailAccount = MessageConfig["mail_sender"]
@@ -274,4 +272,4 @@ def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
                 logging.exception(ErrorStatus)
                 return False
 
-# 2024_02_23
+# 2024_03_04

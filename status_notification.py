@@ -28,11 +28,11 @@ def StatusChecker(ConfigFilePath,StatusFilePath,CheckingResultFilter,CheckingRes
         # Write status file
         status4hentai.ProgramCurrentStatus(StatusFilePath, EventUpdate=StatusTable)
         # Than Alert
-        status4hentai.SendAlert(AlertMode, ConfigFilePath, MessagePayload=StatusTable)
+        status4hentai.SendAlert(AlertMode,ConfigFilePath, MessagePayload=StatusTable)
     # Get pandas DataFrame
     else:
         # Drop unneeded columns for status table, and save to status resutl file
-        status4hentai.SaveStatusTable(CheckFilePath=CheckingResultPath, CheckTableInput=StatusTable, CheckFilter=CheckingResultFilter)        
+        status4hentai.SaveStatusTable(CheckFilePath=CheckingResultPath, CheckTableInput=StatusTable, CheckFilter=CheckingResultFilter)
         # Check server status
         CheckOffline = StatusTable["Status"].isin(["Offline"]).tolist()
         # If server offling, return True
@@ -81,4 +81,4 @@ except Exception:
     status4hentai.ProgramCurrentStatus(StatusFilePath, EventUpdate=("Program has stopped working due to error."))
     sys.exit(0)
 
-# 2024_02_29
+# 2024_03_04
