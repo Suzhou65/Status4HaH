@@ -5,7 +5,6 @@
 [![Size](https://img.shields.io/github/repo-size/Suzhou65/Status4HaH)](https://shields.io/category/size)
 
 Status check for Hentai@Home Client.
-
 ## Contents
 - [Status4HaH](#status4hah)
   * [Contents](#contents)
@@ -34,7 +33,6 @@ Status check for Hentai@Home Client.
     + [Install HentaiatHome](#install-hentaiathome)
     + [Stack Overflow](#stack-overflow)
     + [Screenshot](#screenshot)
-
 ## Usage
 You need to have E-Hentai account, and already running Hentai@Home client.
 ### Scheduling and server loading
@@ -44,17 +42,16 @@ Using Crontab for job scheduling.
 #MIM HOUR DAY MONTH WEEK
 */30  *    *    *    *    root  python /script_path/status_notification.py
 ```
-- Avoiding for making heavy server load on E-Hentai.
 ```diff
+- Avoiding for making heavy server load on E-Hentai.
 - Not recommended for change less then 30 minutes.
 ```
-
 ### E-Hentai account
 Using cookies to login, same as browser extension or viewer.
 
-If you browser is Chromium based, right click to opening Developer Tools, switch to ```Network``` panel. After refresh [Hentai@Home](https://e-hentai.org/hentaiathome.php) page, click the element call ```hentaiathome.php```, you can find ```ipb_member_id``` and ```ipb_pass_hash``` at HTTP header.
+If you browser is Chromium based (ex. Google Chrome or Microsoft Edge), right click to opening Developer Tools, switch to ```Network``` panel. After refresh [Hentai@Home](https://e-hentai.org/hentaiathome.php) page, click the element call ```hentaiathome.php```, tagged cookies, you can find ```ipb_member_id``` and ```ipb_pass_hash```.
 
-First time running this checker, it will asking the cookies.
+Please filled in the cookie's value into configuration file. If you wasn't filled in the configuration, it will asking the cookie when you running the script.
 ```text
 Configuration not found, please initialize.
 
@@ -63,24 +60,15 @@ Please enter the ipb_pass_hash: ••••••••••••••••
 ```
 ### Email alert
 - Google account needed, sign in using App passwords.
-- Receiver is unlimited.
+- Receiver mail address is unlimited.
 
-First time running mail alert function, it will check configuration file. If mail configuration not found, it will print alert.
-```text
-Mail configuration not found, please initialize.
-```
-And return integer values ```404```.
+First time running mail alert function, it will check configuration file. If mail configuration not found, it will return string ```Mail configuration not found, please initialize.```
 ### Telegram alert
 - Using Telegram Bot, contect [BotFather](https://t.me/botfather) create new Bot accounts.
 - HTTP ```API Token``` and ```chat id``` are needed.
 - If the chat channel wasn't create, Telegram API will return ```HTTP 400 Bad Request```, you need to start chat channel including that Bot.
 
-First time running Telegram alert function, it will check configuration file. If Telegram Bot configuration not found, it will print alert.
-```text
-Telegram configuration not found, please initialize.
-```
-And return integer values ```404```.
-
+First time running Telegram alert function, it will check configuration file. If Telegram Bot configuration not found, it will return string ```Telegram configuration not found, please initialize.```
 ## Configuration file
 - Status4HaH store configuration as JSON format file.
 - Configuration file named ```status4hah.config.json```.
@@ -100,23 +88,19 @@ You can editing the clean copy, which looks like this:
   "alert_counting":false
 }
 ```
-If you fill in with correct configure, it will skip initialization check and alert.
-
+If you fill in with correct configure, it will skip initialization check and running script.
 ## Modules instantiation
 Some module not included in [Python Standard Library](https://docs.python.org/3/library/index.html) are needed.
 - [pandas](https://pypi.org/project/pandas/)
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
-
 ## Security and Disclaimer
-Although password inside cookie has been hashed, If someone modify the script, adding Backdoor function to send it back.
 ```diff
+- Although password inside cookie has been hashed,
+- If someone modify the script, adding Backdoor function to send it back.
 - It's possible to login your account without knowing the actual username and password.
+- Original Status4HaH won't have those function.
+- Please make sure you download the clean copy from this Repository.
 ```
-Original Status4HaH won't have those function.
-```diff
-+ Please make sure you download the clean copy from this Repository.
-```
-
 ## Import module
 - Import as module
 ```python
@@ -124,16 +108,15 @@ import status4hentai
 ```
 - Alternatively, you can import the function independent
 ```python
-from status4hentai import GetHentaiStatus
+from status4hentai import CheckHentaiatHome
 ```
-
 ## Function
 ### Get HentaiAtHome status
 ```python
-# Get Hentai@Home Page
-ResponPayload = status4hentai.CheckHentaiatHome(ConfigFilePath)
+# Get Hentai@Home Status
+HentaiAtHomePayload = status4hentai.CheckHentaiatHome(ConfigFilePath)
 # Check Hentai@Home status
-DataTableOutput = status4hentai.GetHentaiStatus(ResponPayload)
+StatusTable = status4hentai.GetHentaiStatus(HentaiAtHomePayload)
 ```
 - It will return ```Pandas DataFrame``` if parsing HTML content correctly.
 - If return ```string``` means controllable error, like server error or logout, that string maybe HTTP Status Code, or Python requests function timeout.
@@ -144,32 +127,35 @@ DataTableOutput = status4hentai.GetHentaiStatus(ResponPayload)
 ```python
 # Configuration file path
 ConfigFilePath = "status4hah.config.json"
-# Status file path
-CheckingResultPath = "status4hah.check.csv"
-# Create status file
+# Runtime file and path
 StatusFilePath = "status4hah.status.csv"
-# Alert selection
-# 0 > Mail alert
-# 1 > Telegram alert (Default)
+# Status file filter
+CheckingResultFilter = ["ID","Created","Client IP","Port","Version","Max Speed","Country"]
+# Status file and path
+CheckingResultPath = "status4hah.check.csv"
+# Alert mode selection
 AlertMode = 0
+# Alert output filter
+AlertFilter = ["Files Served","Trust","Quality","Hitrate","Hathrate"]
 ```
-The function will return ```string``` if messege sending successfully.
+When cookie expired, you will receive a alert message ```Cookie expires. Please update configuration file```.
 ### Status recorder
 - The demonstration script is```status_recorder.py```.
 - Configuration as follows are needed.
 ```python
 # Configuration file path
 ConfigFilePath = "status4hah.config.json"
+# Runtime file and path
+StatusFilePath = "status4hah.status.csv"
+# Recording file filter
+RecordingFilter = ["ID","Created","Client IP","Port","Version","Max Speed","Country"]
 # Recording file path
 RecordingPath = "status4hah.record.csv"
-# Create status file
-StatusFilePath = "status4hah.status.csv"
 ```
 ### Web Based Monitor
 ```status_monitor.php``` is a simple php script webpage to view the status file generated by ```status_notification.py```.
 
 - See the [Demonstration](https://takahashi65.info/page/status_monitor.php).
-
 ## Dependencies
 ### Python version
 - Python 3.6 or above
@@ -188,10 +174,8 @@ StatusFilePath = "status4hah.status.csv"
 ### Webpage
 - Apache or NGINX
 - php 7.3 or above, recommend using php-FPM
-
 ## License
 General Public License -3.0
-
 ## Resources
 ### Beautiful Soup
 - [Beautiful Soup 4.9.0 documentation](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
