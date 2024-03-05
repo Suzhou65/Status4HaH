@@ -150,7 +150,7 @@ def GetHentaiStatus(HentaiAtHomePayload):
                 return ("Error occurred when parsing HTML payload.")
             # Somehow is logout
             else:
-                return ("Cookie expires. Please update configuration file")
+                return ("Cookie expires. Please update the configuration file")
         # Get table correctly, start parsing
         else:
             # Makeing empty list

@@ -47,11 +47,11 @@ Using Crontab for job scheduling.
 - Not recommended for change less then 30 minutes.
 ```
 ### E-Hentai account
-Using cookies to login, same as browser extension or viewer.
+Using cookies to login is the same as using a browser extension or viewer.
 
-If you browser is Chromium based (ex. Google Chrome or Microsoft Edge), right click to opening Developer Tools, switch to ```Network``` panel. After refresh [Hentai@Home](https://e-hentai.org/hentaiathome.php) page, click the element call ```hentaiathome.php```, tagged cookies, you can find ```ipb_member_id``` and ```ipb_pass_hash```.
+If your browser is Chrome-based (ex. Google Chrome or Microsoft Edge), right-click to open Developer Tools and switch to the ```Network``` panel. After refreshing the [Hentai@Home](https://e-hentai.org/hentaiathome.php) page, click the element called hentaiathome.php, which tags cookies. You can find ```ipb_member_id``` and ```ipb_pass_hash```.
 
-Please filled in the cookie's value into configuration file. If you wasn't filled in the configuration, it will asking the cookie when you running the script.
+Please fill in the cookie's value inin theonfiguration file. If you didn't fill in the configuration, it will ask for the cookie when you run the script.
 ```text
 Configuration not found, please initialize.
 
@@ -62,13 +62,13 @@ Please enter the ipb_pass_hash: ••••••••••••••••
 - Google account needed, sign in using App passwords.
 - Receiver mail address is unlimited.
 
-First time running mail alert function, it will check configuration file. If mail configuration not found, it will return string ```Mail configuration not found, please initialize.```
+The first time you run the mail alert function, it will check the configuration file. If the mail configuration is not found, it will return a string ```Mail configuration not found, please initialize.```
 ### Telegram alert
 - Using Telegram Bot, contect [BotFather](https://t.me/botfather) create new Bot accounts.
 - HTTP ```API Token``` and ```chat id``` are needed.
-- If the chat channel wasn't create, Telegram API will return ```HTTP 400 Bad Request```, you need to start chat channel including that Bot.
+- If the chat channel wasn't created, the Telegram API will return ```HTTP 400 Bad Request```. You need to start the chat channel, including that bot.
 
-First time running Telegram alert function, it will check configuration file. If Telegram Bot configuration not found, it will return string ```Telegram configuration not found, please initialize.```
+The first time you run the Telegram alert function, it will check the configuration file. If Telegram Bot configuration is not found, it will return the string ```Telegram configuration not found, please initialize.```
 ## Configuration file
 - Status4HaH store configuration as JSON format file.
 - Configuration file named ```status4hah.config.json```.
@@ -88,25 +88,25 @@ You can editing the clean copy, which looks like this:
   "alert_counting":false
 }
 ```
-If you fill in with correct configure, it will skip initialization check and running script.
+If you fill in the correct configuration, it will skip the initialization check and running script.
 ## Modules instantiation
 Some module not included in [Python Standard Library](https://docs.python.org/3/library/index.html) are needed.
 - [pandas](https://pypi.org/project/pandas/)
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
 ## Security and Disclaimer
 ```diff
-- Although password inside cookie has been hashed,
-- If someone modify the script, adding Backdoor function to send it back.
-- It's possible to login your account without knowing the actual username and password.
-- Original Status4HaH won't have those function.
-- Please make sure you download the clean copy from this Repository.
+- Although the password inside the cookie has been hashed,
+- if someone modifies the script, add a backdoor function to send it back.
+- It's possible to login to your account without knowing the actual username and password.
+- The original Status4HaH won't have those functions.
+- Please make sure you download the clean copy from this repository.
 ```
 ## Import module
 - Import as module
 ```python
 import status4hentai
 ```
-- Alternatively, you can import the function independent
+- Alternatively, you can import the function independently.
 ```python
 from status4hentai import CheckHentaiatHome
 ```
@@ -138,7 +138,7 @@ AlertMode = 0
 # Alert output filter
 AlertFilter = ["Files Served","Trust","Quality","Hitrate","Hathrate"]
 ```
-When cookie expired, you will receive a alert message ```Cookie expires. Please update configuration file```.
+When login cookie expires, you will receive an alert message: ```Cookie expires. Please update the configuration file```.
 ### Status recorder
 - The demonstration script is```status_recorder.py```.
 - Configuration as follows are needed.
