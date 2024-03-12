@@ -119,8 +119,7 @@ HentaiAtHomePayload = status4hentai.CheckHentaiatHome(ConfigFilePath)
 StatusTable = status4hentai.GetHentaiStatus(HentaiAtHomePayload)
 ```
 - It will return ```Pandas DataFrame``` if parsing HTML content correctly.
-- If return ```string``` means controllable error, like server error or logout, that string maybe HTTP Status Code, or Python requests function timeout.
-- If return ```boolean``` means exception error, please check ```status4hah.error.log``` for error handling.
+- If the return is ```String```, it may contain an error message such as an HTTP status code, a cookie expiration alert, or another erroe message. Please review the error handling in ```status4hah.error.log```.
 ### Offline notification
 - The demonstration script is```status_notification.py```.
 - Configuration as follows are needed.
