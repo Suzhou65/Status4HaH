@@ -1,3 +1,25 @@
-.DS_Store
-*.pyc
+# Byte-compiled / optimized
 __pycache__/
+*.pyc
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+*.log
+*.py.cover
+.hypothesis/
+.pytest_cache/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Testing
+error.status4hah.log
+
+# macOS
+.DS_Store

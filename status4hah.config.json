@@ -1,12 +1,26 @@
 {
-  "last_update_time": "",
-  "ipb_member_id": "",
-  "ipb_pass_hash": "",
-  "request_header": "",
-  "mail_sender": "",
-  "mail_scepter": "",
-  "mail_receiver": "",
-  "telegram_token": "",
-  "telegram_id": "",
-  "alert_counting":false
+  "EHentai": {
+    "UserAgent": "",
+    "ipb_member_id": "",
+    "ipb_pass_hash": ""
+  },
+  "RuntimeStatus": {
+    "StatusPath": ""
+  },
+  "DisplayDrop": { 
+    "OutputPath": "",
+    "Filter": [""]
+  },
+   "Telegram_BOTs": {
+      "Token": "",
+      "ChatID": ""
+   },
+   "Mail": {
+    "Sender": "",
+    "Scepter": "",
+    "Receiver": ""
+   },
+   "Alert": {
+    "ContinuityDisable": ""
+   }
 }

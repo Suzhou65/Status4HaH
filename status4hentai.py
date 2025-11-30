@@ -1,275 +1,344 @@
 # -*- coding: utf-8 -*-
-import json
-import pandas
 import logging
-import smtplib
-import requests
+from pathlib import Path
+import json
 import datetime
-from getpass import getpass
+import textwrap
+import csv
+import requests
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
+import smtplib
 
 # For error handling, logfile config
 FORMAT = "%(asctime)s |%(levelname)s |%(message)s"
-# Error logfile name and level config
-logging.basicConfig(level=logging.WARNING,filename="status4hah.error.log",filemode="a",format=FORMAT)
+logging.basicConfig(
+    level=logging.WARNING,
+    filename="error.status4hah.log", filemode="a", format=FORMAT)
+# TESTPASS 25J25
 
-# Generate timestamp
-def GetTime():
-    CurrentTime = datetime.datetime.now()
-    return CurrentTime.strftime("%Y-%m-%d %H:%M")
+# Link reference
+class Link():
+    def __init__(self):
+        self.HentaiAtHome = "https://e-hentai.org/hentaiathome.php"
+        self.Telegram     = "https://api.telegram.org/bot"
+        self.SMTPServer   = "smtp.gmail.com"
+        self.SMTPPort     =  587
 
-# Program running status
-def ProgramCurrentStatus(StatusFilePath,EventUpdate=()):
-    # Table header config
-    StstusHeader = ["Time","Status"]
-    # If check procress complete normally
-    if not EventUpdate:
-        StatusTable = [GetTime(),"Check Complete"]
-    # If not, update status
-    else:
-        StatusTable = [GetTime(),EventUpdate]
-    # Save as table
-    status_output = pandas.DataFrame(data=[StatusTable],columns=StstusHeader)
-    # Save to csv file
-    status_output.to_csv(StatusFilePath,mode="w",index=False)
-
-# Configuration file read and write
-def Configuration(ConfigFilePath,ConfigUpdate=()):
-    # Just read configuration
-    if not ConfigUpdate:
-        # Reading configuration file
+# Configuration function, reading json file
+class Configuration():
+    def __init__(self, ConfigFilePath):
         try:
-            with open(ConfigFilePath,"r") as ConfigurationFile:
-                # Return as python dictionary
-                return json.load(ConfigurationFile)
-        # If file not found
-        except FileNotFoundError:
-            # Initialization message
-            print("Configuration not found, please initialize.\r\n")
-            # Input basic configuration
-            ipb_member_id = getpass("Please enter the ipb_member_id: ")
-            ipb_pass_hash = getpass("Please enter the ipb_pass_hash: ")
-            configuration_update = GetTime()
-            # Dictionary
-            ConfigInitialize = {
-                # Recording configuration update time
-                "last_update":configuration_update,
-                # EHentai-Cookie
-                "ipb_member_id":ipb_member_id,
-                "ipb_pass_hash":ipb_pass_hash,
-                # Broswer User-Agent
-                "request_header":"",
-                # Google Mail as sneder
-                "mail_sender":"",
-                "mail_scepter":"",
-                # Mail address receive
-                "mail_receiver": "",
-                # Telegram BOT token
-                "telegram_token":"",
-                # Telegram ID receive
-                "telegram_id":"",
-                # Check flag
-                "alert_counting":False
-                }
-            # Save configuration file
-            with open(ConfigFilePath,"w") as ConfigurationFile:
-                # Save
-                json.dump(ConfigInitialize,ConfigurationFile,indent=2)
-                print("Configuration saved successfully.")
-                # Return dictionary
-                return ConfigInitialize
-    # Update configuration
-    elif type(ConfigUpdate) is dict:
-        # Log update time
-        TimeConfigUpdate = GetTime()
-        ConfigUpdate["last_update"] = TimeConfigUpdate
-        # Save
-        with open(ConfigFilePath,"w") as ConfigurationFile:
-            json.dump(ConfigUpdate,ConfigurationFile,indent=2)
-            # Return dictionary
-            return ConfigUpdate
+            ConfigInput = Path(ConfigFilePath)
+            with ConfigInput.open("r", encoding = "utf-8") as ConfigFile:
+                ConfigData = json.load(ConfigFile)
+                self.Load = ConfigData
+        # Error
+        except Exception as ConfigurationError:
+            raise Exception(ConfigurationError)
+    # TESTPASS 25K25
 
-# Check Hentai@Home
-def CheckHentaiatHome(ConfigFilePath):
-    # Hentai@Home page
-    HentaiAtHomePage = "https://e-hentai.org/hentaiathome.php"
-    # Get cookie and header config
-    GetPayload = Configuration(ConfigFilePath)
-    # Make cookies
-    ipbm = GetPayload["ipb_member_id"]
-    ipbp = GetPayload["ipb_pass_hash"]
-    BrowserCookies = {"ipb_member_id":ipbm,"ipb_pass_hash":ipbp}
-    # Make user-agent
-    Headers = GetPayload["request_header"]
-    RequestHeaders = {"user-agent":Headers}
-    # Get hentaiathome page
-    try:
-        HentaiAtHomeRespon = requests.get(HentaiAtHomePage,headers=RequestHeaders,cookies=BrowserCookies,timeout=10)
-        # If request succcess
-        if HentaiAtHomeRespon.status_code == 200:
-            HentaiAtHomeRespon.close()
-            # Return payload
-            return HentaiAtHomeRespon.content
-        # If not
-        else:
-            HentaiAtHomeRespon.close()
-            # Return integer
-            return HentaiAtHomeRespon.status_code
-    # If timeout
-    except requests.exceptions.Timeout as ErrorTimeOut:
-        logging.warning(ErrorTimeOut)
-        # Return integer
-        return 408
-    # Error handling
-    except Exception as ErrorStatus:
-        logging.exception(ErrorStatus)
-        # Return bool
-        return False
+# Runtime package
+class Runtime():
+    def __init__(self, ConfigFilePath):
+        self.RuntimeConfig  = Configuration(ConfigFilePath).Load
+        # Runtime status csv
+        self.Status4Rumtime = self.RuntimeConfig['RuntimeStatus']['StatusPath']
+        # H@H client status csv
+        self.ClientsStatus  = self.RuntimeConfig['DisplayDrop']['OutputPath']
+        self.DropKey        = self.RuntimeConfig['DisplayDrop']['Filter']
+        # Recording functio
+        self.ActiveRecord   = self.RuntimeConfig['Recording']['StatusRecord']
+        self.TapePath       = self.RuntimeConfig['Recording']['RecordingPath']
+        # Terminal text width
+        self.MessageWidth = 100
+    # Print runtime info
+    def Message(self, MessageText =('foo')):
+        PrintTime = datetime.datetime.now()
+        TimeHMS    = PrintTime.strftime("%H:%M:%S")
+        TextPrefix = (f"{TimeHMS} | ")
+        UsableWidth = self.MessageWidth - len(TextPrefix)
+        SequentIndent = " " * len(TextPrefix)
+        Wrapping = textwrap.fill(
+            MessageText, width=UsableWidth, subsequent_indent=SequentIndent)
+        print(TextPrefix + Wrapping)
+    # TESTPASS 25K25
+    # Runtime status
+    def StatusRuntime(self, Event = ('bar')):
+        try:
+            PrintTime = datetime.datetime.now()
+            TimeYMDHMS = PrintTime.strftime("%Y-%m-%d %H:%M:%S")
+            StatusBook = (f"{TimeYMDHMS}, {Event}")
+            RuntimeCSV = Path(self.Status4Rumtime)
+            with RuntimeCSV.open("w") as RuntimeTable:
+                RuntimeTable.write(StatusBook)
+            self.Message(Event)
+        except Exception as StatusTableError:
+            logging.warning(StatusTableError)
+    # TESTPASS 25K25
+    # Drop sensitive keys
+    def StatusKeyDrop(self, StatusData):
+        try:
+            RemoveKeys = self.DropKey
+            for StatusRow in StatusData:
+                for RemoveKey in RemoveKeys:
+                    StatusRow.pop(RemoveKey, None)
+            return StatusData
+        except Exception as StatuDropError:
+            logging.warning(StatuDropError)
+    # TESTPASS 25K30
+    # Webpage status output
+    def StatusWebpage(self, DisplayData):
+        try:
+            # Table header
+            StatusHeader = list(DisplayData[0].keys())
+            # File path
+            StatusWeb = Path(self.ClientsStatus)
+            with open(StatusWeb, "w", newline="", encoding="utf-8") as StatusCSV:
+                StatusWriter = csv.DictWriter(StatusCSV, fieldnames=StatusHeader)
+                # Write header
+                StatusWriter.writeheader()
+                # Write clients row
+                for Row in DisplayData:
+                    StatusWriter.writerow(Row)
+        except Exception as StatusWebError:
+            logging.warning(StatusWebError)
+    # TESTPASS 25K30
+    # Save H@h clients data into separate CSV
+    def StatusRecorder(self, DataInput):
+        # Disable recording
+        if isinstance(self.ActiveRecord, bool) and self.ActiveRecord is False:
+            pass
+        # Enable recording
+        if isinstance(self.ActiveRecord, bool) and self.ActiveRecord is True:
+            RecordingPath = Path(self.TapePath)
+            DataInput: list[dict]
+            try:
+                RecordingPath.mkdir(parents=True, exist_ok=True)
+                for DataRow in DataInput:
+                    ClientName = DataRow.get("Client", None)
+                    if ClientName is None:
+                        continue
+                    TapePath = RecordingPath / f"{ClientName}.csv"
+                    FieldNames = list(DataRow.keys())
+                    FileExists = TapePath.exists()
+                    with TapePath.open("a", newline="", encoding="utf-8") as TapeWriter:
+                        RowWriter = csv.DictWriter(TapeWriter, fieldnames=FieldNames)
+                        if not FileExists:
+                            RowWriter.writeheader()
+                        RowWriter.writerow(DataRow)
+            except Exception as RecordError:
+                logging.warning(RecordError) 
+    # TESTPASS 25K30
 
-# Parsing HTML and get status table
-def GetHentaiStatus(HentaiAtHomePayload):
-    # Check respon payload
-    if type(HentaiAtHomePayload) is int:
-        # Get integer, maybe server error or request timeout. Return string with HTTP Status code
-        return (f"HTTP Status Code: {HentaiAtHomePayload}")
-    elif type(HentaiAtHomePayload) is bool:
-        # Get exception input, the worst case
-        return ("Exception happened during processing of request Hentai@Home Status.")
-    else:
-        # Get bytes, maybe is HTML payload, Parsing bytes to HTML
-        HentaiAtHomePayload2HTML = BeautifulSoup(HentaiAtHomePayload,"html.parser")
-        # Finding table named hct, which contain HentaiAtHome status
-        TableHCT = HentaiAtHomePayload2HTML.find("table",id="hct")
-        # Chech logout or other situations
-        if not TableHCT:
+# Hentai@Home check
+class EHentai():
+    def __init__(self, ConfigFilePath):
+        self.EHentaiConfig  = Configuration(ConfigFilePath).Load
+        self.Member         = self.EHentaiConfig['EHentai']['ipb_member_id']
+        self.Password       = self.EHentaiConfig['EHentai']['ipb_pass_hash']
+        self.UserAgent      = self.EHentaiConfig['EHentai']['UserAgent']
+        self.Com = Link()
+        self.RtM = Runtime(ConfigFilePath)
+    def CheckHentaiatHome(self):
+        try:
+            # Checking
+            CheckRespon = requests.get(
+                self.Com.HentaiAtHome,
+                headers = {"user-agent": self.UserAgent},
+                cookies = {"ipb_member_id": self.Member, "ipb_pass_hash": self.Password},
+                timeout = 30)
+            # HTTP Error
+            if CheckRespon.status_code != 200:
+                CheckRespon.close()
+                logging.warning(CheckRespon.status_code)
+                return CheckRespon.status_code
+            # HTTP 200 OK
+            elif CheckRespon.status_code == 200:
+                CheckRespon.close()
+            # BS4 kick-in
+            ResponHTML = BeautifulSoup(CheckRespon.content, "html.parser")
+            # Try to find table named hct, which contain HentaiAtHome status
+            TableHCT = ResponHTML.find("table", id="hct")
             # Try to find login table
-            TableLogIn = HentaiAtHomePayload2HTML.find("table",id="d")
-            # Something worse
-            if not TableLogIn:
-                return ("Error occurred when parsing HTML payload.")
-            # Somehow is logout
+            TableLogIn = ResponHTML.find("table", id="d")
+            # Check logout
+            if TableLogIn and not TableHCT:
+                NeedLogin = ("Require Login")
+                self.RtM.StatusRuntime(NeedLogin)
+                return NeedLogin
+            # Get status table
+            elif TableHCT and not TableLogIn:
+                # Rows in table
+                HCTRows = TableHCT.find_all("tr")
+                # Header as key
+                HCTHeaders = [th.get_text(strip=True) for th in HCTRows[0].find_all('th')]
+                # List for all clients
+                ParsedRows = []
+                # Value after first row
+                for HCTRow in HCTRows[1:]:
+                    ElementTDs = HCTRow.find_all("td")
+                    # Empty value section
+                    if not ElementTDs:
+                        continue
+                    # Dictionary for client
+                    RowDict = {}
+                    # Package with key and value
+                    for key, cell in zip(HCTHeaders, ElementTDs):
+                        # Value text
+                        text = cell.get_text(strip=True).replace("KB/s","KBps").replace(" / "," per ")
+                        # Adding blank in empty value
+                        RowDict[key] = text if text != "" else None
+                    ParsedRows.append(RowDict)
+                # Return Status dictionary
+                return ParsedRows
+            # Exception
             else:
-                return ("Cookie expires. Please update the configuration file")
-        # Get table correctly, start parsing
-        else:
-            # Makeing empty list
-            ContentList = []
-            ContentHeader = []
-            # Parsing table
-            StatusTable = TableHCT.find_all('tr')
-            for tr in StatusTable:
-                # Find header row
-                th = tr.find_all("th")
-                RowHeader = [tr.text for tr in th]
-                # Find data row
-                td = tr.find_all("td")
-                RowContent = [tr.text for tr in td]
-                # Filling in
-                ContentList.append(RowContent)
-                ContentHeader.append(RowHeader)
-            # Remove empty element
-            ContentHeader = ContentHeader[0]
-            ContentList.pop(0)
-            # Return Pandas dataframe
-            return pandas.DataFrame(ContentList,columns=ContentHeader)
-
-# Save Pandas dataframe to CSV
-def SaveStatusTable(CheckFilePath,CheckTableInput,CheckFilter=()):
-    try:
-        if not CheckFilter:
-            CheckTableInput.to_csv(CheckFilePath,mode="w",index=False,header=True)
-            return CheckTableInput
-        else:
-            CheckTableInput.drop(columns=CheckFilter,inplace=True)
-            CheckTableInput.to_csv(CheckFilePath,mode="w",index=False,header=True)
-            return CheckTableInput
-    except Exception as ErrorStatus:
-        logging.exception(ErrorStatus)
-        return False
-
-# Trans Pandas dataframe with offline server into dictionary and string
-def Table2String(TableInput,DropFilter):
-    try:
-        # Drop unneeded columns again
-        TableInput.drop(columns=DropFilter,inplace=True)
-        # Choice offline server only
-        TableInput = TableInput.loc[TableInput["Status"] == "Offline"]
-        # Translate into dictionary
-        Table2Dict = TableInput.to_dict(orient="records")
-        # Translate dictionary into string
-        Dict2String = str(Table2Dict).replace("[","").replace("]","").replace("}, {","},\r\n{")
-        return Dict2String
-    except Exception as ErrorStatus:
-        logging.exception(ErrorStatus)
-        return False
-
-# Sending alert
-def SendAlert(AlertMode,ConfigFilePath,MessagePayload):
-    # Load configuration
-    MessageConfig = Configuration(ConfigFilePath)
-    # Sending telegram message via bots
-    if AlertMode == 0:
-        # Ckeck configuration
-        if len(MessageConfig["telegram_token"]) == 0:
-            return ("Telegram configuration not found, please initialize.")
-        # Find configuration
-        else:
-            TelegramBotToken = MessageConfig["telegram_token"]
-            TelegramReceiver = MessageConfig["telegram_id"]
-            # Make telegram url
-            TelegramBotURL = f"https://api.telegram.org/bot{TelegramBotToken}/sendMessage"
-            TelegramJsonPayload = {"chat_id":TelegramReceiver,"text":MessagePayload}
-            # Sending telegram 
-            try:
-                TelegramResponse = requests.post(TelegramBotURL,json=TelegramJsonPayload)
-                if TelegramResponse.status_code == 200:
-                    TelegramResponse.close()
-                    # Return payload
-                    return 200
-                # Chat channel wasn't create
-                elif TelegramResponse.status_code == 400:
-                    TelegramResponse.close()
-                    # Return 400 Bad request
-                    return ("Chat channel wasn't create.")
-                # Other error
+                return False
+        except Exception as CheckHentaiatHomeError:
+            logging.warning(CheckHentaiatHomeError)
+            return False
+    # TESTPASS 25K30
+    # Check offline client
+    def OfflineChecker(self, StatusDictionary):
+        try:
+            # Offline client list
+            OfflineClientList = []
+            # Check all client
+            for ClientList in StatusDictionary:
+                if ClientList['Status'] == ("Offline"):
+                    OfflineClientList.append(ClientList['Client'])
                 else:
-                    TelegramResponse.close()
-                    return (f"Telegram API respons: {TelegramResponse.status_code}")
-            except Exception as ErrorStatus:
-                logging.exception(ErrorStatus)
-                return False
-    # Sending mail via Gmail
-    else:
-        # Ckeck configuration
-        if len(MessageConfig["mail_sender"]) == 0:
-            return ("Mail configuration not found, please initialize.")
-        # Find configuration
-        else:
-            MailAccount = MessageConfig["mail_sender"]
-            MailPassword = MessageConfig["mail_scepter"]
-            MailReceiver = MessageConfig["mail_receiver"]
-            # Sending mail via gmail
-            MailMessage = MIMEText(MessagePayload)
-            MailTimeStamp = GetTime()
-            MailMessage["Subject"] = (f"Alert | {MailTimeStamp}")
-            MailMessage["From"] = MailAccount
-            MailMessage["To"] = MailReceiver
-            try:
-                # Connect to gmail server
-                SmtpServer = smtplib.SMTP("smtp.gmail.com",587)
-                SmtpServer.ehlo()
-                SmtpServer.starttls()
-                SmtpServer.ehlo
-                SmtpServer.login(MailAccount,MailPassword)
-                # Sending
-                SmtpServer.sendmail(MailAccount,[MailReceiver],MailMessage.as_string())
-                # Close connection
-                SmtpServer.quit()
-                # Retun mail text
-                return 200
-            except Exception as ErrorStatus:
-                logging.exception(ErrorStatus)
-                return False
+                    pass
+            return OfflineClientList
+        except Exception as OfflineCheckerError:
+            logging.warning(OfflineCheckerError)
+            return False
+    # UNT
 
-# 2024_03_04
+# Alert function
+class Alert():
+    def __init__(self, ConfigFilePath):
+        self.Com           = Link()
+        self.RtM           = Runtime(ConfigFilePath)
+        self.AlertConfig   = Configuration(ConfigFilePath).Load
+        # Telegram
+        self.BotToken      = self.AlertConfig['Telegram_BOTs']['Token']
+        self.ChatID        = self.AlertConfig['Telegram_BOTs']['ChatID']
+        # SMTP
+        self.MailSender    = self.AlertConfig['Mail']['Sender']
+        self.SenderScepter = self.AlertConfig['Mail']['Scepter']
+        self.Receiver      = self.AlertConfig['Mail']['Receiver']
+        # Stop alert Continuity
+        self.Continuity    = self.AlertConfig['Alert']['ContinuityDisable']
+        # Timestemp
+        SendingTime        = datetime.datetime.now()
+        self.SendingYMDHMS = SendingTime.strftime("%Y-%m-%d %H:%M:%S")
+        self.SendingHMS    = SendingTime.strftime("%H:%M:%S")
+    # Keep sending alert or not
+    def StopAlert(self, Reset = (False)):
+        # Keeping alert
+        if isinstance(self.Continuity, bool) and self.Continuity is False:
+            return 200
+        # Enable stop alert
+        if isinstance(self.Continuity, str):
+            Blocker = Path(self.Continuity)
+            # All client online
+            if Reset is True:
+                # Delete blocker
+                try:
+                    Blocker.unlink()
+                    return 200
+                # Blocker already delete
+                except FileNotFoundError:
+                    return 200
+                # Fail-safe
+                except Exception as StopAlertError:
+                    logging.warning(StopAlertError)
+                    return 200
+            # Client offline
+            if Reset is False:
+                # Alert continuity set, stop alert
+                if Blocker.exists():
+                    return 400
+                # Blocker not found, create blocker and alert
+                else:
+                    try:
+                        with open(Blocker, "w") as BlockStone:
+                            BlockStone.write(self.SendingYMDHMS)
+                        return 200
+                    # Fail-safe
+                    except Exception as StopAlertError:
+                        logging.warning(StopAlertError)
+                        return 200
+        # Fail-safe
+        else:
+            logging.warning("ContinuityDisable should be false of path string")
+            return 200
+    # UNT
+    # Set default message for testing
+    def Telegram(self, TelegramMessage = ('Here, the world!')):
+        # Connetc URL
+        TgURL = (self.Com.Telegram + f"{self.BotToken}/sendMessage")
+        # Text content
+        TgMsg = {"chat_id": f"{self.ChatID}", "text": TelegramMessage}
+        try:
+            TgResponse = requests.post(TgURL, json=TgMsg, timeout=30)
+            if TgResponse.status_code == 200:
+                TgResponse.close()
+                self.RtM.Message(TelegramMessage)
+            elif TgResponse.status_code == 400:
+                TgResponse.close()
+                self.RtM.Message("Telegram ChatID is empty, notifications will not be sent.")
+                logging.warning(TgResponse.status_code)
+            else:
+                TgResponse.close()
+                logging.warning(TgResponse.status_code)
+        except Exception as TelegramErrorStatus:
+            logging.warning(TelegramErrorStatus)
+    # UNT
+    # Get Telegram ChatID
+    def GetTelegramChatID(self):
+        # Connetc URL
+        TgAskURL = (self.Com.Telegram + f"{self.BotToken}/getUpdates")
+        try:
+            TgAskResponse = requests.post(TgAskURL, timeout=30)
+            if TgAskResponse.status_code == 200:
+                TgAskData = json.loads(TgAskResponse.text)
+                TgAskResponse.close()
+                # Empty result
+                if len(TgAskData['result']) == 0:
+                    self.RtM.Message("You must send message to bot first.")
+                # Select ChatID
+                else:
+                    CheckChatID = TgAskData["result"][0]['message']['chat']['id']
+                    self.RtM.Message(f"Your ChatID is: {CheckChatID}")
+            else:
+                TgAskResponse.close()
+                logging.warning(TgAskResponse.status_code)
+        except Exception as TelegramGetIDError:
+            logging.warning(TelegramGetIDError)
+    # UNT
+    # Sending mail alert, default using gmail smtp
+    def Mail(self, MailMessage= ('Sweet Escape')):
+        try:
+            # Mail text
+            MailMessage = MIMEText(MailMessage)
+            # Mail title
+            MailMessage["Subject"] = (f"Hentai@Home Offline | {self.SendingHMS}")
+            MailMessage["From"] = self.MailSender
+            MailMessage["To"] = self.Receiver
+            # Connect to gmail server
+            LinkSMTPServer = smtplib.SMTP(self.Com.SMTPServer, self.Com.SMTPPort)
+            LinkSMTPServer.ehlo()
+            LinkSMTPServer.starttls()
+            LinkSMTPServer.login(self.MailSender, self.SenderScepter)
+            # Sending
+            LinkStatus = LinkSMTPServer.sendmail(
+                self.MailSender, self.Receiver, MailMessage.as_string())
+            # Close connection
+            LinkSMTPServer.quit()
+            return LinkStatus
+        except Exception as MailErrorStatus:
+            logging.warning(MailErrorStatus)
+    # UNT
