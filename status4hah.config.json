@@ -2,15 +2,27 @@
   "EHentai": {
     "UserAgent": "",
     "ipb_member_id": "",
-    "ipb_pass_hash": ""
+    "ipb_pass_hash": "",
+    "TableHeader": [
+      "Client","ID","Status","Created","Last Seen",
+      "Files Served","Client IP","Port","Version","Max Speed",
+      "Trust","Quality","Hitrate","Hathrate","Region"]
   },
   "RuntimeStatus": {
-    "StatusPath": ""
+    "StatusPath": "/var/www/html/status4hah.runtime.csv"
   },
   "DisplayDrop": { 
-    "OutputPath": "",
-    "Filter": [""]
+    "OutputPath": "/var/www/html/status4hah.status.csv",
+    "Filter": ["ID","Created","Client IP","Port"]
   },
+  "Recording":{
+    "StatusRecord": false,
+    "RecordingPath": "/Documents/script/record/"
+  },
+  "Alert": {
+    "Mode": false,
+    "ContinuousAlert": false
+   },
    "Telegram_BOTs": {
       "Token": "",
       "ChatID": ""
@@ -19,8 +31,5 @@
     "Sender": "",
     "Scepter": "",
     "Receiver": ""
-   },
-   "Alert": {
-    "ContinuityDisable": ""
-   }
+   }  
 }
