@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import status4hentai as s4h
 from sys import exit
-
 # Configuration file path
 ConfigFilePath = "/Documents/script/status4hah.config.json"
-
+# Script
 def main():
     Rt = s4h.Runtime(ConfigFilePath)
     Eh = s4h.EHentai(ConfigFilePath)
@@ -48,7 +47,7 @@ def main():
             Rt.StatusRuntime("Hentai@Home client offline detected.")
             OfflineNotify = (f"Hentai@Home client offline.\r\nClient Name: {OfflineClient}")
             Al.Alarm(OfflineNotify)
-    # QC 2025L04
+    # QC 2025L05
 # Runtime
 if __name__ == "__main__":
     try:

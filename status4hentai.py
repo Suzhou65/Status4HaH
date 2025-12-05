@@ -83,14 +83,30 @@ class Runtime():
     # Drop sensitive keys
     def StatusKeyDrop(self, StatusData):
         try:
+            # Get drop keys
             RemoveKeys = self.DropKey
+            # Disable sensitive keys dropping, return with sensitive keys
+            if isinstance(RemoveKeys, bool) and RemoveKeys is False:
+                return StatusData
+            # Enable sensitive keys dropping
+            elif isinstance(RemoveKeys, list):
+                pass
+            # Error
+            else:
+                # Error prompt
+                self.Message("StatusKeyDrop should be select between false or filter list.")
+                # Error warning
+                logging.warning("Invalid filter config. Applying minimal sensitive key filtering.")
+                # Minimum sensitive keys dropping
+                RemoveKeys = ["Client IP","Port"]
+            # Dropping
             for StatusRow in StatusData:
                 for RemoveKey in RemoveKeys:
                     StatusRow.pop(RemoveKey, None)
             return StatusData
         except Exception as StatuDropError:
             logging.warning(StatuDropError)
-        # QC 2025K30
+        # QC 2025L05
 
     # Webpage status output
     def StatusWebpage(self, DisplayData):
@@ -148,7 +164,7 @@ class Runtime():
                         RowWriter.writerow(DataRow)
             except Exception as RecordError:
                 logging.warning(RecordError) 
-        # UNTP
+        # QC 2025L05
 
 # Hentai@Home check
 class EHentai():

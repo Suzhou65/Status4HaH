@@ -9,10 +9,10 @@
       "Trust","Quality","Hitrate","Hathrate","Region"]
   },
   "RuntimeStatus": {
-    "StatusPath": "/var/www/html/status4hah.runtime.csv"
+    "StatusPath": "/Documents/script/status4hah.runtime.csv"
   },
   "DisplayDrop": { 
-    "OutputPath": "/var/www/html/status4hah.status.csv",
+    "OutputPath": "/Documents/script/status4hah.status.csv",
     "Filter": ["ID","Created","Client IP","Port"]
   },
   "Recording":{
@@ -21,7 +21,7 @@
   },
   "Alert": {
     "Mode": false,
-    "ContinuousAlert": false
+    "ContinuousAlert": true
    },
    "Telegram_BOTs": {
       "Token": "",
